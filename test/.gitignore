@@ -1,0 +1,15 @@
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+bin/
+db/
+
+docker/src/
+
+node_modules/
