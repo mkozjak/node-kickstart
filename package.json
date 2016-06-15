@@ -2,12 +2,12 @@
   "name": "app",
   "version": "1.0.0",
   "description": "qaap microservice ECMAScript kickstart",
-  "main": "dist/app.js",
+  "main": "dist/index.js",
   "scripts": {
     "preinstall": "mkdir -p dist",
     "postinstall": "bash tools/beautify_source.sh && ./node_modules/babel-cli/bin/babel.js src -d dist",
     "test": "./node_modules/mocha/bin/mocha test/*spec.js",
-    "start": "node dist/app.js"
+    "start": "node dist/index.js"
   },
   "repository": {
     "type": "https",
