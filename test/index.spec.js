@@ -35,7 +35,7 @@ describe("# api test", function()
 
     before("start microservice", function(done)
     {
-        exec("ps x | fgrep log-server.js | fgrep -v 'grep' | wc -l | awk '{$1=$1};1'", function(error, out)
+        exec("ps x | fgrep index.js | fgrep -v 'grep' | wc -l | awk '{$1=$1};1'", function(error, out)
         {
             if (out != 0)
                 return done()
