@@ -7,13 +7,13 @@ const url = require("url")
 module.exports = async function()
 {
     // fetch configuration
-    // TODO: try getting conf from remote (kubernetes/rancher metadata?)
+    // TODO: try getting conf from remote (kubernetes/rancher metadata/docker swarm?)
 
-    let bus_connection = null
+    let esb = null
 
     try
     {
-        bus_connection = await amqp.connect(url.format(
+        esb = await amqp.connect(url.format(
         {
             protocol: config.service_bus.protocol,
             auth: config.service_bus.username + ":" + config.service_bus.password,
@@ -26,6 +26,4 @@ module.exports = async function()
     {
         throw error
     }
-
-    console.log(bus_connection)
 }
