@@ -2,7 +2,8 @@
 
 const exec = require('child_process').exec
 const rabbitmq = require("./rabbitmq-server")
-const spawn = require('child_process').spawn
+const rethinkdb = require("./rethinkdb-server")
+const spawn = require("child_process").spawn
 
 let app = null
 
@@ -13,6 +14,17 @@ describe("# api test", function()
     before("start rabbitmq server", function(done)
     {
         rabbitmq.start.then(function()
+        {
+            done()
+        }, function(error)
+        {
+            done(error)
+        })
+    })
+
+    before("start rethinkdb server", function(done)
+    {
+        rethinkdb.start.then(function(resp)
         {
             done()
         }, function(error)
