@@ -18,6 +18,7 @@
   "homepage": "https://github.com/qaap/kickstart.git",
   "dependencies": {
     "amqplib": "^0.4.2",
+    "assert-args": "^1.1.2",
     "bluebird": "^3.3.4",
     "rethinkdb": "^2.3.2"
   },
