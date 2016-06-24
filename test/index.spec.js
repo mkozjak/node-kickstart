@@ -1,9 +1,120 @@
 "use strict"
 
 const Docker = require("dockerode")
+const exec = require('child_process').exec
+const pkg = require("../package.json")
+const spawn = require("child_process").spawn
 
 let docker = new Docker()
 let app = null
+
+describe("# api test", function()
+{
+    this.timeout(10000)
+
+    let rmq_id = null,
+        rdb_id = null
+
+    /* external services */
+    before("start rabbitmq service", function(done)
+    {
+        runContainer("rabbitmq", "rabbitmq").then(function(id)
+        {
+            rmq_id = id
+            done()
+        }, function(error)
+        {
+            done(error)
+        })
+    })
+
+    before("start rethinkdb service", function(done)
+    {
+        runContainer("rethinkdb", "rethinkdb").then(function(id)
+        {
+            rdb_id = id
+            done()
+        }, function(error)
+        {
+            done(error)
+        })
+    })
+
+    after("stop rabbitmq server", function(done)
+    {
+        if (!rmq_id)
+            return done()
+
+        let container = docker.getContainer(rmq_id)
+
+        container.stop(function(error)
+        {
+            if (error)
+                return done(error)
+
+            container.remove(function(error)
+            {
+                if (error)
+                    return done(error)
+
+                done()
+            })
+        })
+    })
+
+    after("stop rethinkdb server", function(done)
+    {
+        if (!rdb_id)
+            return done()
+
+        let container = docker.getContainer(rdb_id)
+
+        container.stop(function(error)
+        {
+            if (error)
+                return done(error)
+
+            container.remove(function(error)
+            {
+                if (error)
+                    return done(error)
+
+                done()
+            })
+        })
+    })
+
+    /* main/developed service */
+    before("start microservice", function(done)
+    {
+        let cmd = `ps x | fgrep 'node ${pkg.main}' | fgrep -v 'fgrep' | wc -l | awk '{$1=$1};1'`
+
+        exec(cmd, function(error, out)
+        {
+            if (error)
+                return done(error)
+
+            if (out != 0)
+                return done()
+
+            app = spawn('node', [pkg.main])
+
+            done()
+        })
+    })
+
+    after("stop microservice", function(done)
+    {
+        if (app !== null)
+        {
+            app.kill("SIGKILL")
+        }
+
+        done()
+    })
+
+    it("should say something", function() {})
+})
 
 function runContainer(image_name, container_name)
 {
@@ -62,106 +173,3 @@ function runContainer(image_name, container_name)
         })
     })
 }
-
-describe("# api test", function()
-{
-    this.timeout(10000)
-
-    let rmq_id = null,
-        rdb_id = null
-
-    /* external services */
-    before("start rabbitmq service", function(done)
-    {
-        runContainer("rabbitmq", "rabbitmq").then(function(id)
-        {
-            rmq_id = id
-            done()
-        }, function(error)
-        {
-            done(error)
-        })
-    })
-
-    before("start rethinkdb service", function(done)
-    {
-        runContainer("rethinkdb", "rethinkdb").then(function(id)
-        {
-            rdb_id = id
-            done()
-        }, function(error)
-        {
-            done(error)
-        })
-    })
-
-    after("stop rabbitmq server", function(done)
-    {
-        if (rmq_id === null)
-            return done()
-
-        let container = docker.getContainer(rmq_id)
-
-        container.stop(function(error)
-        {
-            if (error)
-                return done(error)
-
-            container.remove(function(error)
-            {
-                if (error)
-                    return done(error)
-
-                done()
-            })
-        })
-    })
-
-    after("stop rethinkdb server", function(done)
-    {
-        if (rdb_id === null)
-            return done()
-
-        let container = docker.getContainer(rdb_id)
-
-        container.stop(function(error)
-        {
-            if (error)
-                return done(error)
-
-            container.remove(function(error)
-            {
-                if (error)
-                    return done(error)
-
-                done()
-            })
-        })
-    })
-
-    /* main/developed service */
-    before("start microservice", function(done)
-    {
-        exec("ps x | fgrep index.js | fgrep -v 'grep' | wc -l | awk '{$1=$1};1'", function(error, out)
-        {
-            if (out != 0)
-                return done()
-
-            app = spawn('node', ['dist/index.js'])
-
-            done()
-        })
-    })
-
-    after("stop microservice", function(done)
-    {
-        if (app != null)
-        {
-            app.kill("SIGKILL")
-        }
-
-        done()
-    })
-
-    it("should say something", function() {})
-})
