@@ -106,9 +106,7 @@ describe("# api test", function()
     after("stop microservice", function(done)
     {
         if (app !== null)
-        {
             app.kill("SIGKILL")
-        }
 
         done()
     })
