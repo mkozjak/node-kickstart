@@ -2,6 +2,7 @@
 
 const Docker = require("dockerode")
 const exec = require('child_process').exec
+const os = require("os")
 const pkg = require("../package.json")
 const spawn = require("child_process").spawn
 
@@ -14,6 +15,43 @@ describe("# api test", function()
 
     let rmq_id = null,
         rdb_id = null
+
+    before("check if docker service is running", function(done)
+    {
+        switch (os.platform())
+        {
+            case "darwin":
+                exec("docker-machine status default", function(error, stdout, stderr)
+                {
+                    if (error)
+                        return done(error)
+
+                    if (stderr)
+                        return done(stderr)
+
+                    if (stdout.trim() !== "Running")
+                        return done("docker service not running!")
+
+                    done()
+                })
+
+                break
+
+            case "linux":
+                exec("systemctl status docker", function(error, _, stderr)
+                {
+                    if (error && error.code !== 0)
+                        return done("docker service not running!")
+
+                    if (stderr)
+                        return done(stderr)
+
+                    done()
+                })
+
+                break
+        }
+    })
 
     /* external services */
     before("start rabbitmq service", function(done)
@@ -171,7 +209,7 @@ function runContainer(image_name, tag, container_name)
             {
                 return new Promise(function(resolve, reject)
                 {
-                    console.log("fetching image", image_tag)
+                    console.log("  ==> fetching image", image_tag)
 
                     docker.pull(image_tag, function(error, stream)
                     {
