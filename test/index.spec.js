@@ -10,7 +10,7 @@ let app = null
 
 describe("# api test", function()
 {
-    this.timeout(10000)
+    this.timeout(300000)
 
     let rmq_id = null,
         rdb_id = null
@@ -18,7 +18,7 @@ describe("# api test", function()
     /* external services */
     before("start rabbitmq service", function(done)
     {
-        runContainer("rabbitmq", "rabbitmq").then(function(id)
+        runContainer("rabbitmq", "latest", "rabbitmq").then(function(id)
         {
             rmq_id = id
             done()
@@ -30,7 +30,7 @@ describe("# api test", function()
 
     before("start rethinkdb service", function(done)
     {
-        runContainer("rethinkdb", "rethinkdb").then(function(id)
+        runContainer("rethinkdb", "latest", "rethinkdb").then(function(id)
         {
             rdb_id = id
             done()
@@ -114,8 +114,10 @@ describe("# api test", function()
     it("should say something", function() {})
 })
 
-function runContainer(image_name, container_name)
+function runContainer(image_name, tag, container_name)
 {
+    let image_tag = image_name + ":" + tag
+
     return new Promise(function(resolve, reject)
     {
         docker.listContainers(function(error, containers)
@@ -129,45 +131,111 @@ function runContainer(image_name, container_name)
                     return resolve()
             }
 
-            let image = docker.getImage(image_name)
-
-            image.inspect(function(error, data)
+            docker.listImages(function(error, list)
             {
                 if (error)
                     return reject(error)
 
-                let bindings = {
-                    PortBindings:
-                    {}
-                }
-
-                for (let port of Object.keys(data.ContainerConfig.ExposedPorts))
+                for (let i = 0, len = list.length; i < len; i++)
                 {
-                    bindings.PortBindings[port] = [
+                    if (list[i].RepoTags.indexOf(image_tag) !== -1)
                     {
-                        "HostPort": port.split("/")[0]
-                    }]
+                        // we already have the image downloaded, so we can start it
+                        return startImage().then(function(id)
+                        {
+                            resolve(id)
+                        }, function(error)
+                        {
+                            reject(error)
+                        })
+                    }
                 }
 
-                docker.createContainer(
+                // no image present, download and start
+                fetchImage().then(function()
                 {
-                    Image: image_name,
-                    name: container_name,
-                    HostConfig: bindings
-                }, function(error, container)
+                    startImage().then(function(id)
+                    {
+                        resolve(id)
+                    }, function(error)
+                    {
+                        reject(error)
+                    })
+                }, function(error)
                 {
-                    if (error)
-                        return reject(error)
+                    reject(error)
+                })
+            })
 
-                    container.start(function(error, data)
+            function fetchImage()
+            {
+                return new Promise(function(resolve, reject)
+                {
+                    console.log("fetching image", image_tag)
+
+                    docker.pull(image_tag, function(error, stream)
                     {
                         if (error)
                             return reject(error)
 
-                        resolve(container.id)
+                        stream.on("data", function()
+                        {
+                            process.stdout.write(".")
+                        })
+                        stream.once("end", function()
+                        {
+                            console.log("\ndone fetching", image_tag)
+                            resolve()
+                        })
                     })
                 })
-            })
+            }
+
+            function startImage()
+            {
+                return new Promise(function(resolve, reject)
+                {
+                    let image = docker.getImage(image_name)
+
+                    image.inspect(function(error, data)
+                    {
+                        if (error)
+                            return reject(error)
+
+                        let bindings = {
+                            PortBindings:
+                            {}
+                        }
+
+                        for (let port of Object.keys(data.ContainerConfig.ExposedPorts))
+                        {
+                            bindings.PortBindings[port] = [
+                            {
+                                "HostPort": port.split("/")[0]
+                            }]
+                        }
+
+                        docker.createContainer(
+                        {
+                            Image: image_name,
+                            name: container_name,
+                            HostConfig: bindings
+                        }, function(error, container)
+                        {
+                            if (error)
+                                return reject(error)
+
+                            container.start(function(error, data)
+                            {
+                                if (error)
+                                    return reject(error)
+
+                                resolve(container.id)
+                            })
+                        })
+                    })
+                })
+            }
         })
     })
 }
