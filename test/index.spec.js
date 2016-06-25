@@ -30,7 +30,7 @@ describe("# api test", function()
                         return done(stderr)
 
                     if (stdout.trim() !== "Running")
-                        return done("docker service not running!")
+                        return done(new Error("docker service not running!"))
 
                     done()
                 })
@@ -41,7 +41,7 @@ describe("# api test", function()
                 exec("systemctl status docker", function(error, _, stderr)
                 {
                     if (error && error.code !== 0)
-                        return done("docker service not running!")
+                        return done(new Error("docker service not running!"))
 
                     if (stderr)
                         return done(stderr)
