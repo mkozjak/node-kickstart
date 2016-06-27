@@ -9,7 +9,7 @@ const spawn = require("child_process").spawn
 let docker = new Docker()
 let app = null
 
-describe("# api test", function()
+describe("# basic functionality", function()
 {
     this.timeout(300000)
 
@@ -184,7 +184,7 @@ function runContainer(image_name, tag, container_name)
                 {
                     if (list[i].RepoTags.indexOf(image_tag) !== -1)
                     {
-                        // we already have the image downloaded, so we can start it
+                        /* we already have the image downloaded, so we can start it */
                         return startImage().then(function(id)
                         {
                             resolve(id)
@@ -195,7 +195,7 @@ function runContainer(image_name, tag, container_name)
                     }
                 }
 
-                // no image present, download and start
+                /* no image present, download and start */
                 fetchImage().then(function()
                 {
                     startImage().then(function(id)
