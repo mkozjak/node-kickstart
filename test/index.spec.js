@@ -32,7 +32,13 @@ describe("# api test", function()
                     if (stdout.trim() !== "Running")
                         return done(new Error("docker service not running!"))
 
-                    done()
+                    if (!process.env.DOCKER_HOST)
+                    {
+                        return done(
+                            new Error(
+                                "you must run 'eval \"$(docker-machine env default)\" before running npm test'"))
+                    }
+                    else done()
                 })
 
                 break
