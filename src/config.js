@@ -1,5 +1,9 @@
 'use strict'
 
+module.exports.general = {
+    app_name: "kickstart"
+}
+
 module.exports.service_bus = {
     type: "rabbitmq",
     protocol: "amqp",
@@ -16,4 +20,8 @@ module.exports.database = {
     port: 28015,
     username: "admin",
     password: ""
+}
+
+module.exports.logging = {
+    queue_name: "logs"
 }
