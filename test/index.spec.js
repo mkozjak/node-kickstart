@@ -9,7 +9,6 @@ const spawn = require("child_process").spawn
 
 let app = null
 let docker = null
-let docker_options = {}
 
 if (process.env["DOCKER_CERT_PATH"])
 {
@@ -256,7 +255,7 @@ function runContainer(image_name, tag, container_name)
 
     return new Promise(function(resolve, reject)
     {
-        docker.listContainers(docker_options, function(error, containers)
+        docker.listContainers(function(error, containers)
         {
             if (error)
                 return reject(error)
@@ -267,7 +266,7 @@ function runContainer(image_name, tag, container_name)
                     return resolve()
             }
 
-            docker.listImages(docker_options, function(error, list)
+            docker.listImages(function(error, list)
             {
                 if (error)
                     return reject(error)
@@ -309,7 +308,7 @@ function runContainer(image_name, tag, container_name)
                 {
                     process.stdout.write("  ==> fetching image " + image_tag + " ")
 
-                    docker.pull(image_tag, docker_options, function(error, stream)
+                    docker.pull(image_tag, function(error, stream)
                     {
                         if (error)
                             return reject(error)
