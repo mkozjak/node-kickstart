@@ -37,15 +37,19 @@ describe("# basic functionality", function()
             case "darwin":
                 const docker_machine = "/usr/local/bin/docker-machine"
 
+                // check if docker host is running
                 exec(`${docker_machine} status default`, function(error, stdout, stderr)
                 {
                     if (error)
                     {
                         if (stderr.indexOf("Host does not exist: \"default\"") !== -1)
                         {
+                            // create a new docker host
                             createDockerHost().then(function()
                                 {
                                     console.log(" done")
+
+                                    // set docker environment variables
                                     setEnvVars().then(done)
                                 })
                                 .catch(function(error)
@@ -62,6 +66,7 @@ describe("# basic functionality", function()
 
                         if (!process.env.DOCKER_HOST)
                         {
+                            // set docker environment variables
                             setEnvVars().then(done, function(error)
                             {
                                 done(error)
@@ -270,6 +275,7 @@ function runContainer(image_name, tag, container_name)
 
             for (let container of containers)
             {
+                // if the same image is already instantiated, don't run it
                 if (container.Image === image_name)
                     return resolve()
             }
