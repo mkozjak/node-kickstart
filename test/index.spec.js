@@ -1,13 +1,27 @@
 "use strict"
 
 const Docker = require("dockerode")
-const exec = require('child_process').exec
+const exec = require("child_process").exec
+const fs = require("fs")
 const os = require("os")
 const pkg = require("../package.json")
 const spawn = require("child_process").spawn
 
-let docker = new Docker()
 let app = null
+let docker = null
+let docker_options = {}
+
+if (process.env["DOCKER_CERT_PATH"])
+{
+    fs.stat(process.env["DOCKER_CERT_PATH"], function(error)
+    {
+        if (error)
+            delete process.env["DOCKER_CERT_PATH"]
+
+        docker = new Docker()
+    })
+}
+else docker = new Docker()
 
 describe("# basic functionality", function()
 {
@@ -21,25 +35,103 @@ describe("# basic functionality", function()
         switch (os.platform())
         {
             case "darwin":
-                exec("docker-machine status default", function(error, stdout, stderr)
+                const docker_machine = "/usr/local/bin/docker-machine"
+
+                exec(`${docker_machine} status default`, function(error, stdout, stderr)
                 {
                     if (error)
-                        return done(error)
-
-                    if (stderr)
-                        return done(stderr)
-
-                    if (stdout.trim() !== "Running")
-                        return done(new Error("docker service not running!"))
-
-                    if (!process.env.DOCKER_HOST)
                     {
-                        return done(
-                            new Error(
-                                "you must run 'eval \"$(docker-machine env default)\" before running npm test'"))
+                        if (stderr.indexOf("Host does not exist: \"default\"") !== -1)
+                        {
+                            createDockerHost().then(function()
+                                {
+                                    console.log(" done")
+                                    setEnvVars().then(done)
+                                })
+                                .catch(function(error)
+                                {
+                                    done(error)
+                                })
+                        }
+                        else return done(error)
                     }
-                    else done()
+                    else
+                    {
+                        if (stdout.trim() !== "Running")
+                            return done(new Error("docker service not running!"))
+
+                        if (!process.env.DOCKER_HOST)
+                        {
+                            setEnvVars().then(done, function(error)
+                            {
+                                done(error)
+                            })
+                        }
+
+                        else done()
+                    }
                 })
+
+                function createDockerHost()
+                {
+                    return new Promise(function(resolve, reject)
+                    {
+                        process.stdout.write("  ==> creating a new virtualbox vm ")
+
+                        let dots = setInterval(function()
+                        {
+                            process.stdout.write(".")
+                        }, 2000)
+
+                        exec(`${docker_machine} create -d virtualbox ` +
+                            `--virtualbox-memory 2048 --virtualbox-disk-size 204800 default`,
+                            function(error, stdout, stderr)
+                            {
+                                if (error)
+                                    return reject(error)
+
+                                clearInterval(dots)
+                                resolve()
+                            })
+                    })
+                }
+
+                function setEnvVars()
+                {
+                    return new Promise(function(resolve, reject)
+                    {
+                        exec(`${docker_machine} env default`, function(error, stdout)
+                        {
+                            if (error)
+                                return reject(error)
+
+                            for (let line of stdout.split("\n"))
+                            {
+                                if (line.indexOf("export ") === -1)
+                                    continue
+
+                                let entry = line.split("export ").pop().split("=")
+                                process.env[entry[0]] = entry[1].replace(/"/g, "")
+                            }
+
+                            if (!process.env["DOCKER_CERT_PATH"])
+                                return reject(new Error(
+                                    "failed to set mandatory DOCKER_CERT_PATH env var"))
+
+                            // we need to set env vars after
+                            // the Docker object has been instantiated
+                            let cert_path = process.env["DOCKER_CERT_PATH"]
+
+                            docker.modem.ca = fs.readFileSync(cert_path + "/ca.pem")
+                            docker.modem.cert = fs.readFileSync(cert_path + "/cert.pem")
+                            docker.modem.key = fs.readFileSync(cert_path + "/key.pem")
+                            docker.modem.protocol = "https"
+                            delete docker.modem.socketPath
+
+                            resolve()
+                        })
+                    })
+                }
 
                 break
 
@@ -59,7 +151,7 @@ describe("# basic functionality", function()
         }
     })
 
-    /* external services */
+    // external services
     before("start rabbitmq service", function(done)
     {
         runContainer("rabbitmq", "latest", "rabbitmq").then(function(id)
@@ -128,7 +220,7 @@ describe("# basic functionality", function()
         })
     })
 
-    /* main/developed service */
+    // main/developed service
     before("start microservice", function(done)
     {
         let cmd = `ps x | fgrep 'node ${pkg.main}' | fgrep -v 'fgrep' | wc -l | awk '{$1=$1};1'`
@@ -164,7 +256,7 @@ function runContainer(image_name, tag, container_name)
 
     return new Promise(function(resolve, reject)
     {
-        docker.listContainers(function(error, containers)
+        docker.listContainers(docker_options, function(error, containers)
         {
             if (error)
                 return reject(error)
@@ -175,7 +267,7 @@ function runContainer(image_name, tag, container_name)
                     return resolve()
             }
 
-            docker.listImages(function(error, list)
+            docker.listImages(docker_options, function(error, list)
             {
                 if (error)
                     return reject(error)
@@ -184,7 +276,7 @@ function runContainer(image_name, tag, container_name)
                 {
                     if (list[i].RepoTags.indexOf(image_tag) !== -1)
                     {
-                        /* we already have the image downloaded, so we can start it */
+                        // we already have the image downloaded, so we can start it
                         return startImage().then(function(id)
                         {
                             resolve(id)
@@ -195,7 +287,7 @@ function runContainer(image_name, tag, container_name)
                     }
                 }
 
-                /* no image present, download and start */
+                // no image present, download and start
                 fetchImage().then(function()
                 {
                     startImage().then(function(id)
@@ -215,9 +307,9 @@ function runContainer(image_name, tag, container_name)
             {
                 return new Promise(function(resolve, reject)
                 {
-                    console.log("  ==> fetching image", image_tag)
+                    process.stdout.write("  ==> fetching image " + image_tag + " ")
 
-                    docker.pull(image_tag, function(error, stream)
+                    docker.pull(image_tag, docker_options, function(error, stream)
                     {
                         if (error)
                             return reject(error)
@@ -228,7 +320,7 @@ function runContainer(image_name, tag, container_name)
                         })
                         stream.once("end", function()
                         {
-                            console.log("\ndone fetching", image_tag)
+                            console.log(" done")
                             resolve()
                         })
                     })
