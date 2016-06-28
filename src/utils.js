@@ -46,3 +46,37 @@ module.exports.setConfig = function(config)
     if (argv["service-bus-password"])
         config.service_bus.password = argv["service-bus-password"]
 }
+
+module.exports.setLogging = function(config)
+{
+    assertArgs(arguments,
+    {
+        "config": "object"
+    })
+
+    return require("bunyan").createLogger(
+    {
+        name: config.general.app_name,
+        streams: [
+        {
+            level: "trace",
+            path: config.logging.trace_file
+        },
+        {
+            level: "debug",
+            stream: process.stdout
+        },
+        {
+            type: "raw",
+            level: "info",
+            stream: require("bunyan-amqp")(
+            {
+                host: config.service_bus.hostname,
+                port: config.service_bus.port,
+                username: config.service_bus.username,
+                password: config.service_bus.password,
+                queue: config.service_bus.queue_name
+            })
+        }]
+    })
+}
