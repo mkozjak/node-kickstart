@@ -23,5 +23,6 @@ module.exports.database = {
 }
 
 module.exports.logging = {
-    queue_name: "logs"
+    queue_name: "logs",
+    trace_file: "logs/trace.log"
 }
