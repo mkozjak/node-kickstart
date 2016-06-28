@@ -122,6 +122,8 @@ describe("# basic functionality", function()
                             // the Docker object has been instantiated
                             let cert_path = process.env["DOCKER_CERT_PATH"]
 
+                            docker.modem.host = url.parse(process.env.DOCKER_HOST).hostname
+                            docker.modem.port = url.parse(process.env.DOCKER_HOST).port
                             docker.modem.ca = fs.readFileSync(cert_path + "/ca.pem")
                             docker.modem.cert = fs.readFileSync(cert_path + "/cert.pem")
                             docker.modem.key = fs.readFileSync(cert_path + "/key.pem")
