@@ -9,7 +9,7 @@ module.exports.setConfig = function(config)
         "config": "object"
     })
 
-    return require('yargs').usage("usage: npm start -- [options]")
+    let argv = require('yargs').usage("usage: npm start -- [options]")
         .option("service-bus-hostname",
         {
             describe: "service bus hostname",
@@ -45,6 +45,8 @@ module.exports.setConfig = function(config)
 
     if (argv["service-bus-password"])
         config.service_bus.password = argv["service-bus-password"]
+
+    return argv
 }
 
 module.exports.setLogging = function(config)
