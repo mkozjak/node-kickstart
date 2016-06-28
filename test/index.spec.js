@@ -6,6 +6,7 @@ const fs = require("fs")
 const os = require("os")
 const pkg = require("../package.json")
 const spawn = require("child_process").spawn
+const url = require("url")
 
 let app = null
 let docker = null
@@ -232,7 +233,12 @@ describe("# basic functionality", function()
             if (out != 0)
                 return done()
 
-            app = spawn('node', [pkg.main])
+            let options = [pkg.main]
+
+            if (os.platform() === "darwin")
+                options.push("service-bus-hostname", url.parse(process.env.DOCKER_HOST).hostname)
+
+            app = spawn("node", options)
 
             done()
         })
