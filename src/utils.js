@@ -77,7 +77,7 @@ module.exports.setLogging = function(config)
                 port: config.service_bus.port,
                 username: config.service_bus.username,
                 password: config.service_bus.password,
-                queue: config.service_bus.queue_name
+                queue: config.logging.queue_name
             })
         }]
     })
