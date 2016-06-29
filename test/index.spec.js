@@ -245,7 +245,10 @@ describe("# basic functionality", function()
             if (os.platform() === "darwin")
                 options.push("service-bus-hostname", url.parse(process.env.DOCKER_HOST).hostname)
 
-            app = spawn("node", options)
+            app = spawn("node", options,
+            {
+                stdio: [null, null, "ipc"]
+            })
 
             done()
         })
@@ -259,7 +262,14 @@ describe("# basic functionality", function()
         done()
     })
 
-    it("should say something", function() {})
+    it("should say something", function()
+    {
+        app.on("message", function(msg)
+        {
+            console.log(msg)
+            done()
+        })
+    })
 })
 
 function runContainer(image_name, tag, container_name)
