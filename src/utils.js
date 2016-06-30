@@ -1,6 +1,7 @@
 'use strict'
 
 const assertArgs = require("assert-args")
+const stringify = require("json-stringify-safe")
 
 module.exports.setConfig = function(config)
 {
@@ -60,12 +61,8 @@ module.exports.setLogging = function(config)
     {
         write(data)
         {
-            assertArgs(arguments,
-            {
-                "config": "object"
-            })
-
-            process.stdout.write(`${JSON.stringify(data)}\n`)
+            // TODO: support more than one argument
+            process.stdout.write(`${stringify(data)}\n`)
         }
     }
 
