@@ -1,8 +1,6 @@
 ## Testing and startup
 ```
-npm install
-npm test
-npm start
+npm install && npm test && npm start
 ```
 
 ## Debug pretty-printing
