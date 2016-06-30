@@ -1,7 +1,7 @@
 'use strict'
 
-const amqp = require("amqplib")
 const config = require("./config")
+const rabbit = require("rabbit.js")
 const rethinkdb = require("rethinkdb")
 const url = require("url")
 const utils = require("./utils")
@@ -17,11 +17,12 @@ module.exports = async function()
     // setup logging
     const log = utils.setLogging(config)
 
-    let esb = null
+    // setup rabbitmq connection
+    let amqp_context = null
 
     try
     {
-        esb = await amqp.connect(url.format(
+        amqp_context = rabbit.createContext(url.format(
         {
             protocol: config.service_bus.protocol,
             auth: config.service_bus.username + ":" + config.service_bus.password,
@@ -29,11 +30,19 @@ module.exports = async function()
             port: config.service_bus.port,
             slashes: true
         }))
+
+        amqp_context.on("ready", () =>
+        {
+            log.debug("_app_ready")
+        })
+
+        amqp_context.on("error", (error) =>
+        {
+            throw error
+        })
     }
     catch (error)
     {
         throw error
     }
-
-    log.debug("startup done")
 }
