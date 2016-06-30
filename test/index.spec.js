@@ -5,7 +5,7 @@ const exec = require("child_process").exec
 const fs = require("fs")
 const os = require("os")
 const pkg = require("../package.json")
-const spawn = require("child_process").spawn
+const fork = require("child_process").fork
 const url = require("url")
 
 let app = null
@@ -240,36 +240,43 @@ describe("# basic functionality", function()
             if (out != 0)
                 return done()
 
-            let options = [pkg.main]
+            let options = []
 
             if (os.platform() === "darwin")
-                options.push("service-bus-hostname", url.parse(process.env.DOCKER_HOST).hostname)
+                options.push("--service-bus-hostname", url.parse(process.env.DOCKER_HOST).hostname)
 
-            app = spawn("node", options,
+            app = fork(pkg.main, options)
+
+            app.on("message", function(message)
             {
-                stdio: [null, null, "ipc"]
+                if (message === "ready")
+                    return done()
             })
 
-            done()
+            app.on("close", function(code, signal)
+            {
+                done(new Error("app closed with code " + code))
+            })
+
+            app.on("error", function(error)
+            {
+                done(error)
+            })
+
+            app.on("exit", function(code, signal)
+            {
+                done(new Error("app exited with code " + code))
+            })
         })
     })
 
-    after("stop microservice", function(done)
+    after("stop microservice", function()
     {
         if (app !== null)
             app.kill("SIGKILL")
-
-        done()
     })
 
-    it("should say something", function()
-    {
-        app.on("message", function(msg)
-        {
-            console.log(msg)
-            done()
-        })
-    })
+    it("should say something", function() {})
 })
 
 function runContainer(image_name, tag, container_name)

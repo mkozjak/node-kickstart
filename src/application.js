@@ -12,7 +12,7 @@ module.exports = async function()
     // TODO: try getting conf from remote (kubernetes/rancher metadata/docker swarm?)
 
     // parse command-line arguments
-    const argv = utils.setConfig(config)
+    utils.setConfig(config)
 
     // TODO: logger setup (bunyan?)
     const log = utils.setLogging(config)
@@ -34,4 +34,7 @@ module.exports = async function()
     {
         throw error
     }
+
+    if (process.send)
+        process.send("ready")
 }
