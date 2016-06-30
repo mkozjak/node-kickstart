@@ -1,6 +1,7 @@
 'use strict'
 
 const assertArgs = require("assert-args")
+const bunyan = require("bunyan")
 const stringify = require("json-stringify-safe")
 
 module.exports.setConfig = function(config)
@@ -62,11 +63,12 @@ module.exports.setLogging = function(config)
         write(data)
         {
             // TODO: support more than one argument
+            // FIXME: circular data gets like '[object Object]' here
             process.stdout.write(`${stringify(data)}\n`)
         }
     }
 
-    return require("bunyan").createLogger(
+    return bunyan.createLogger(
     {
         name: config.general.app_name,
         streams: [
