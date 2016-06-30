@@ -245,12 +245,19 @@ describe("# basic functionality", function()
             if (os.platform() === "darwin")
                 options.push("--service-bus-hostname", url.parse(process.env.DOCKER_HOST).hostname)
 
-            app = fork(pkg.main, options)
-
-            app.on("message", function(message)
+            app = fork(pkg.main, options,
             {
-                if (message === "ready")
+                silent: true
+            })
+
+            app.stdout.on("data", function(data)
+            {
+                let message = data.toString()
+
+                if (JSON.parse(message).msg === "startup done")
+                {
                     return done()
+                }
             })
 
             app.on("close", function(code, signal)

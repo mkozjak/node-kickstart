@@ -35,5 +35,5 @@ module.exports = async function()
         throw error
     }
 
-    log.debug("ready")
+    log.debug("startup done")
 }

@@ -56,7 +56,7 @@ module.exports.setLogging = function(config)
         "config": "object"
     })
 
-    class IPCStream
+    class DebugStream
     {
         write(data)
         {
@@ -65,8 +65,7 @@ module.exports.setLogging = function(config)
                 "config": "object"
             })
 
-            if (process.send)
-                process.send(data.msg)
+            process.stdout.write(`${JSON.stringify(data)}\n`)
         }
     }
 
@@ -81,7 +80,7 @@ module.exports.setLogging = function(config)
         {
             type: "raw",
             level: "debug",
-            stream: new IPCStream()
+            stream: new DebugStream()
         },
         {
             type: "raw",
