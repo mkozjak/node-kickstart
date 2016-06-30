@@ -254,7 +254,7 @@ describe("# basic functionality", function()
             {
                 let message = JSON.parse(data.toString()).msg
 
-                if (message === "startup done")
+                if (message === "_app_ready")
                 {
                     return done()
                 }
