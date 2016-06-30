@@ -252,12 +252,14 @@ describe("# basic functionality", function()
 
             app.stdout.on("data", function(data)
             {
-                let message = data.toString()
+                let message = JSON.parse(data.toString()).msg
 
-                if (JSON.parse(message).msg === "startup done")
+                if (message === "startup done")
                 {
                     return done()
                 }
+
+                console.log("  @ npm test debugging output:", message)
             })
 
             app.on("close", function(code, signal)
