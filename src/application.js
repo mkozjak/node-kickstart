@@ -14,7 +14,7 @@ module.exports = async function()
     // parse command-line arguments
     utils.setConfig(config)
 
-    // TODO: logger setup (bunyan?)
+    // setup logging
     const log = utils.setLogging(config)
 
     let esb = null
@@ -35,6 +35,5 @@ module.exports = async function()
         throw error
     }
 
-    if (process.send)
-        process.send("ready")
+    log.debug("ready")
 }

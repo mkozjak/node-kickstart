@@ -56,6 +56,20 @@ module.exports.setLogging = function(config)
         "config": "object"
     })
 
+    class IPCStream
+    {
+        write(data)
+        {
+            assertArgs(arguments,
+            {
+                "config": "object"
+            })
+
+            if (process.send)
+                process.send(data.msg)
+        }
+    }
+
     return require("bunyan").createLogger(
     {
         name: config.general.app_name,
@@ -65,8 +79,9 @@ module.exports.setLogging = function(config)
             path: config.logging.trace_file
         },
         {
+            type: "raw",
             level: "debug",
-            stream: process.stdout
+            stream: new IPCStream()
         },
         {
             type: "raw",
