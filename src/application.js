@@ -18,8 +18,18 @@ module.exports = async function()
     // setup rabbitmq connection
     try
     {
-        await utils.setupRabbit(config)
+        let channel = await utils.setupRabbit(config)
+
+        // add rabbitmq connection to logger
+        log.addStream(
+        {
+            type: "raw",
+            level: "info",
+            stream: new utils.InfoStream(channel)
+        })
+
         log.debug("_app_ready")
+        log.info("test123")
     }
     catch (error)
     {

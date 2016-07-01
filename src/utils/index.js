@@ -74,34 +74,38 @@ module.exports.setLogging = function(config)
     {
         name: config.general.app_name,
         streams: [
-            {
-                level: "trace",
-                path: config.logging.trace_file
-            },
-            {
-                type: "raw",
-                level: "debug",
-                stream: new DebugStream()
-            }
-            /*,
-                    {
-                        type: "raw",
-                        level: "info",
-                        stream: require("bunyan-amqp")(
-                        {
-                            host: config.service_bus.hostname,
-                            port: config.service_bus.port,
-                            username: config.service_bus.username,
-                            password: config.service_bus.password,
-                            queue: config.logging.queue_name
-                        })
-                    }*/
-        ]
+        {
+            level: "trace",
+            path: config.logging.trace_file
+        },
+        {
+            type: "raw",
+            level: "debug",
+            stream: new DebugStream()
+        }]
     })
+}
+
+module.exports.InfoStream = class
+{
+    constructor(channel)
+    {
+        this.amqp_channel = channel
+    }
+
+    write(data)
+    {
+        this.amqp_channel.publish("logging", "test123", new Buffer("Hello"))
+    }
 }
 
 module.exports.setupRabbit = async function(config)
 {
+    assertArgs(arguments,
+    {
+        "config": "object"
+    })
+
     let connection = null
 
     try
@@ -121,6 +125,27 @@ module.exports.setupRabbit = async function(config)
     }
 
     let channel = await connection.createChannel()
+    let queues = config.service_bus.queues
+
+    for (let name in queues)
+    {
+        try
+        {
+            switch (queues[name].type)
+            {
+                // push -> only one consumer takes the job
+                case "push":
+                    await channel.assertExchange(queues[name].exchange, "topic")
+                    break
+            }
+
+            return channel
+        }
+        catch (error)
+        {
+            throw error
+        }
+    }
 
     channel.on("error", (error) =>
     {
