@@ -10,7 +10,15 @@ module.exports.service_bus = {
     hostname: "localhost",
     port: 5672,
     username: "guest",
-    password: "guest"
+    password: "guest",
+    queues:
+    {
+        logs:
+        {
+            exchange: "logging",
+            type: "push"
+        }
+    }
 }
 
 module.exports.database = {
