@@ -1,8 +1,8 @@
 'use strict'
 
+const amqp = require("amqplib")
 const assertArgs = require("assert-args")
 const bunyan = require("bunyan")
-const rabbit = require("rabbit.js")
 const stringify = require("json-stringify-safe")
 const url = require("url")
 
@@ -100,36 +100,26 @@ module.exports.setLogging = function(config)
     })
 }
 
-module.exports.setupRabbit = function(config)
+module.exports.setupRabbit = async function(config)
 {
-    return new Promise(function(resolve, reject)
+    let connection = await amqp.connect(url.format(
     {
-        let ctx = rabbit.createContext(url.format(
-        {
-            protocol: config.service_bus.protocol,
-            auth: config.service_bus.username + ":" + config.service_bus.password,
-            hostname: config.service_bus.hostname,
-            port: config.service_bus.port,
-            slashes: true
-        }))
+        protocol: config.service_bus.protocol,
+        auth: config.service_bus.username + ":" + config.service_bus.password,
+        hostname: config.service_bus.hostname,
+        port: config.service_bus.port,
+        slashes: true
+    }))
 
-        ctx.on("ready", () =>
-        {
-            let sockets = {
-                pub: ctx.socket("PUB"),
-                sub: ctx.socket("SUB"),
-                push: ctx.socket("PUSH"),
-                pull: ctx.socket("PULL"),
-                req: ctx.socket("REQ"),
-                rep: ctx.socket("REP")
-            }
+    let channel = await connection.createChannel()
 
-            resolve()
-        })
+    channel.on("error", (error) =>
+    {
+        throw error
+    })
 
-        ctx.on("error", (error) =>
-        {
-            reject(error)
-        })
+    channel.on("close", () =>
+    {
+        throw new Error("channel closed")
     })
 }
