@@ -102,14 +102,23 @@ module.exports.setLogging = function(config)
 
 module.exports.setupRabbit = async function(config)
 {
-    let connection = await amqp.connect(url.format(
+    let connection = null
+
+    try
     {
-        protocol: config.service_bus.protocol,
-        auth: config.service_bus.username + ":" + config.service_bus.password,
-        hostname: config.service_bus.hostname,
-        port: config.service_bus.port,
-        slashes: true
-    }))
+        connection = await amqp.connect(url.format(
+        {
+            protocol: config.service_bus.protocol,
+            auth: config.service_bus.username + ":" + config.service_bus.password,
+            hostname: config.service_bus.hostname,
+            port: config.service_bus.port,
+            slashes: true
+        }))
+    }
+    catch (error)
+    {
+        throw error
+    }
 
     let channel = await connection.createChannel()
 
