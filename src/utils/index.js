@@ -88,14 +88,15 @@ module.exports.setLogging = function(config)
 
 module.exports.InfoStream = class
 {
-    constructor(channel)
+    constructor(channel, exchange)
     {
         this.amqp_channel = channel
+        this.exchange = exchange
     }
 
     write(data)
     {
-        this.amqp_channel.publish("logging", "test123", new Buffer("Hello"))
+        this.amqp_channel.publish(this.exchange, "test123", new Buffer("Hello"))
     }
 }
 

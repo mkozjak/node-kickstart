@@ -25,7 +25,7 @@ module.exports = async function()
         {
             type: "raw",
             level: "info",
-            stream: new utils.InfoStream(channel)
+            stream: new utils.InfoStream(channel, config.service_bus.queues.logs.exchange)
         })
 
         log.debug("_app_ready")
