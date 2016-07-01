@@ -2,7 +2,9 @@
 
 const assertArgs = require("assert-args")
 const bunyan = require("bunyan")
+const rabbit = require("rabbit.js")
 const stringify = require("json-stringify-safe")
+const url = require("url")
 
 module.exports.setConfig = function(config)
 {
@@ -72,26 +74,62 @@ module.exports.setLogging = function(config)
     {
         name: config.general.app_name,
         streams: [
-        {
-            level: "trace",
-            path: config.logging.trace_file
-        },
-        {
-            type: "raw",
-            level: "debug",
-            stream: new DebugStream()
-        },
-        {
-            type: "raw",
-            level: "info",
-            stream: require("bunyan-amqp")(
             {
-                host: config.service_bus.hostname,
-                port: config.service_bus.port,
-                username: config.service_bus.username,
-                password: config.service_bus.password,
-                queue: config.logging.queue_name
-            })
-        }]
+                level: "trace",
+                path: config.logging.trace_file
+            },
+            {
+                type: "raw",
+                level: "debug",
+                stream: new DebugStream()
+            }
+            /*,
+                    {
+                        type: "raw",
+                        level: "info",
+                        stream: require("bunyan-amqp")(
+                        {
+                            host: config.service_bus.hostname,
+                            port: config.service_bus.port,
+                            username: config.service_bus.username,
+                            password: config.service_bus.password,
+                            queue: config.logging.queue_name
+                        })
+                    }*/
+        ]
+    })
+}
+
+module.exports.setupRabbit = function(config)
+{
+    return new Promise(function(resolve, reject)
+    {
+        let ctx = rabbit.createContext(url.format(
+        {
+            protocol: config.service_bus.protocol,
+            auth: config.service_bus.username + ":" + config.service_bus.password,
+            hostname: config.service_bus.hostname,
+            port: config.service_bus.port,
+            slashes: true
+        }))
+
+        ctx.on("ready", () =>
+        {
+            let sockets = {
+                pub: ctx.socket("PUB"),
+                sub: ctx.socket("SUB"),
+                push: ctx.socket("PUSH"),
+                pull: ctx.socket("PULL"),
+                req: ctx.socket("REQ"),
+                rep: ctx.socket("REP")
+            }
+
+            resolve()
+        })
+
+        ctx.on("error", (error) =>
+        {
+            reject(error)
+        })
     })
 }
