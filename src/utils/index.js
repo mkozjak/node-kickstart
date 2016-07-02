@@ -96,7 +96,7 @@ module.exports.InfoStream = class
 
     write(data)
     {
-        this.amqp_channel.publish(this.exchange, "test123", new Buffer("Hello"))
+        this.amqp_channel.publish(this.exchange, "test123", new Buffer(stringify(data)))
     }
 }
 

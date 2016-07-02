@@ -1,5 +1,7 @@
 "use strict"
 
+const amqp = require("amqplib")
+const config = require("../src/config")
 const Docker = require("dockerode")
 const exec = require("child_process").exec
 const fs = require("fs")
@@ -285,7 +287,55 @@ describe("# basic functionality", function()
             app.kill("SIGKILL")
     })
 
-    it("should say something", function() {})
+    it("should get application logs", function(done)
+    {
+        amqp.connect(
+        {
+            protocol: config.service_bus.protocol,
+            auth: config.service_bus.username + ":" + config.service_bus.password,
+            hostname: "192.168.99.100",
+            port: config.service_bus.port,
+            slashes: true
+        }).then(function(connection)
+        {
+            connection.createChannel().then(function(channel)
+            {
+                var ok = channel.assertExchange(config.service_bus.queues.logs.exchange, "topic")
+
+                ok = ok.then(function()
+                {
+                    return channel.assertQueue("logs")
+                })
+
+                ok = ok.then(function(qok)
+                {
+                    var queue = qok.queue
+
+                    return channel.bindQueue(queue, config.service_bus.queues.logs.exchange, "test123").then(function()
+                    {
+                        return queue
+                    })
+                })
+
+                return ok.then(function(queue)
+                {
+                    return channel.consume(queue, function(message)
+                    {
+                        if (!message.content)
+                            return done(new Error("got a malformed log entry"))
+
+                        done()
+                    },
+                    {
+                        noAck: true
+                    })
+                })
+            })
+        }).catch(function(error)
+        {
+            done(error)
+        })
+    })
 })
 
 function runContainer(image_name, tag, container_name)
