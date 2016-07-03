@@ -245,7 +245,10 @@ describe("# basic functionality", function()
             let options = []
 
             if (os.platform() === "darwin")
+            {
                 options.push("--service-bus-hostname", url.parse(process.env.DOCKER_HOST).hostname)
+                options.push("--database-hostname", url.parse(process.env.DOCKER_HOST).hostname)
+            }
 
             app = fork(pkg.main, options,
             {

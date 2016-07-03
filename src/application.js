@@ -15,12 +15,12 @@ module.exports = async function()
     // setup logging
     const log = utils.setLogging(config)
 
-    // setup rabbitmq connection
+    // setup service bus connection
     try
     {
-        let channel = await utils.setupRabbit(config)
+        let channel = await utils.setupServiceBus(config)
 
-        // add rabbitmq connection to logger
+        // add service bus connection to logger
         log.addStream(
         {
             type: "raw",
@@ -32,6 +32,16 @@ module.exports = async function()
         log.debug("_app_ready")
 
         log.info("application ready")
+    }
+    catch (error)
+    {
+        throw error
+    }
+
+    // setup database connection
+    try
+    {
+        await utils.setupDatabase(config)
     }
     catch (error)
     {

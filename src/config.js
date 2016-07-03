@@ -16,7 +16,7 @@ module.exports.service_bus = {
         logs:
         {
             exchange: "logging",
-            type: "push"
+            type: "push" // for topic exchange
         }
     }
 }

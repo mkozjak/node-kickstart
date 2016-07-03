@@ -3,6 +3,7 @@
 const amqp = require("amqplib")
 const assertArgs = require("assert-args")
 const bunyan = require("bunyan")
+const rethinkdb = require("rethinkdb")
 const stringify = require("json-stringify-safe")
 const url = require("url")
 
@@ -34,6 +35,11 @@ module.exports.setConfig = function(config)
             describe: "service bus password",
             type: "string"
         })
+        .option("database-hostname",
+        {
+            describe: "database hostname",
+            type: "string"
+        })
         .help("h")
         .alias("h", "help")
         .argv
@@ -49,6 +55,9 @@ module.exports.setConfig = function(config)
 
     if (argv["service-bus-password"])
         config.service_bus.password = argv["service-bus-password"]
+
+    if (argv["database-hostname"])
+        config.database.hostname = argv["database-hostname"]
 
     return argv
 }
@@ -100,61 +109,92 @@ module.exports.InfoStream = class
     }
 }
 
-module.exports.setupRabbit = async function(config)
+module.exports.setupServiceBus = async function(config)
 {
     assertArgs(arguments,
     {
         "config": "object"
     })
 
-    let connection = null
-
-    try
+    switch (config.service_bus.type)
     {
-        connection = await amqp.connect(url.format(
-        {
-            protocol: config.service_bus.protocol,
-            auth: config.service_bus.username + ":" + config.service_bus.password,
-            hostname: config.service_bus.hostname,
-            port: config.service_bus.port,
-            slashes: true
-        }))
-    }
-    catch (error)
-    {
-        throw error
-    }
+        case "rabbitmq":
+            let connection = null
 
-    let channel = await connection.createChannel()
-    let queues = config.service_bus.queues
-
-    for (let name in queues)
-    {
-        try
-        {
-            switch (queues[name].type)
+            try
             {
-                // push -> only one consumer takes the job
-                case "push":
-                    await channel.assertExchange(queues[name].exchange, "topic")
-                    break
+                connection = await amqp.connect(url.format(
+                {
+                    protocol: config.service_bus.protocol,
+                    auth: config.service_bus.username + ":" + config.service_bus.password,
+                    hostname: config.service_bus.hostname,
+                    port: config.service_bus.port,
+                    slashes: true
+                }))
+            }
+            catch (error)
+            {
+                throw error
             }
 
-            return channel
-        }
-        catch (error)
-        {
-            throw error
-        }
+            let channel = await connection.createChannel()
+            let queues = config.service_bus.queues
+
+            for (let name in queues)
+            {
+                try
+                {
+                    switch (queues[name].type)
+                    {
+                        // push -> only one consumer takes the job
+                        case "push":
+                            await channel.assertExchange(queues[name].exchange, "topic")
+                            break
+                    }
+
+                    return channel
+                }
+                catch (error)
+                {
+                    throw error
+                }
+            }
+
+            channel.on("error", (error) =>
+            {
+                throw error
+            })
+
+            channel.on("close", () =>
+            {
+                throw new Error("channel closed")
+            })
+
+            break
     }
+}
 
-    channel.on("error", (error) =>
+module.exports.setupDatabase = async function(config)
+{
+    switch (config.database.type)
     {
-        throw error
-    })
+        case "rethinkdb":
+            try
+            {
+                let connection = await rethinkdb.connect(
+                {
+                    host: config.database.hostname,
+                    port: config.database.port,
+                    db: config.database.name,
+                    user: config.database.username,
+                    password: config.database.password
+                })
+            }
+            catch (error)
+            {
+                throw error
+            }
 
-    channel.on("close", () =>
-    {
-        throw new Error("channel closed")
-    })
+            break
+    }
 }
