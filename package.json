@@ -21,7 +21,6 @@
     "assert-args": "^1.1.2",
     "bluebird": "^3.3.4",
     "bunyan": "^1.8.1",
-    "bunyan-amqp": "0.0.6",
     "json-stringify-safe": "^5.0.1",
     "rethinkdb": "^2.3.2",
     "yargs": "^4.7.1"
