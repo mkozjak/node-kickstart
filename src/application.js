@@ -28,8 +28,10 @@ module.exports = async function()
             stream: new utils.InfoStream(channel, config.service_bus.queues.logs.exchange)
         })
 
+        // test-specific signals
         log.debug("_app_ready")
-        log.info("test123")
+
+        log.info("application ready")
     }
     catch (error)
     {
