@@ -71,12 +71,12 @@ module.exports.setLogging = function(config)
 
     bristol.addTarget("file",
         {
-            file: config.logging.trace_file
+            file: config.logging.file.output
         })
-        .withHighestSeverity("trace")
+        .withHighestSeverity(config.logging.file.level)
 
     bristol.addTarget("console")
-        .withHighestSeverity("debug")
+        .withHighestSeverity(config.logging.console.level)
 
     return bristol
 }

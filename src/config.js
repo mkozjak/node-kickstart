@@ -17,7 +17,6 @@ module.exports.service_bus = {
         {
             exchange: "logging",
             type: "push", // for topic exchange
-            level: "info"
         }
     }
 }
@@ -32,6 +31,18 @@ module.exports.database = {
 }
 
 module.exports.logging = {
-    queue_name: "logs",
-    trace_file: "logs/trace.log"
+    service_bus:
+    {
+        queue_name: "logs",
+        level: "info"
+    },
+    console:
+    {
+        level: "debug"
+    },
+    file:
+    {
+        output: "logs/trace.log",
+        level: "trace"
+    }
 }

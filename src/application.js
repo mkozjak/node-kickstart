@@ -26,12 +26,10 @@ module.exports = async function()
                 channel: channel,
                 exchange: config.service_bus.queues.logs.exchange
             })
-            .withHighestSeverity(config.service_bus.queues.logs.level)
+            .withHighestSeverity(config.logging.service_bus.level)
 
         // test-specific signals
         log.debug("_app_ready")
-
-        log.info("application ready")
     }
     catch (error)
     {
