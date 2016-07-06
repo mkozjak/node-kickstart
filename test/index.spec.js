@@ -257,7 +257,7 @@ describe("# basic functionality", function()
 
             app.stdout.on("data", function(data)
             {
-                let message = JSON.parse(data.toString()).msg
+                let message = JSON.parse(data.toString()).message
 
                 if (message === "_app_ready")
                 {
@@ -292,14 +292,14 @@ describe("# basic functionality", function()
 
     it("should get application logs", function(done)
     {
-        amqp.connect(
+        amqp.connect(url.format(
         {
             protocol: config.service_bus.protocol,
             auth: config.service_bus.username + ":" + config.service_bus.password,
-            hostname: "192.168.99.100",
+            hostname: url.parse(process.env.DOCKER_HOST).hostname,
             port: config.service_bus.port,
             slashes: true
-        }).then(function(connection)
+        })).then(function(connection)
         {
             connection.createChannel().then(function(channel)
             {
