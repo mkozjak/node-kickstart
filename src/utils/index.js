@@ -2,7 +2,7 @@
 
 const amqp = require("amqplib")
 const assertArgs = require("assert-args")
-const bunyan = require("bunyan")
+const bristol = require("bristol")
 const rethinkdb = require("rethinkdb")
 const stringify = require("json-stringify-safe")
 const url = require("url")
@@ -69,44 +69,21 @@ module.exports.setLogging = function(config)
         "config": "object"
     })
 
-    class DebugStream
-    {
-        write(data)
+    bristol.addTarget("file",
         {
-            // TODO: support more than one argument
-            // FIXME: circular data gets like '[object Object]' here
-            process.stdout.write(`${stringify(data)}\n`)
-        }
-    }
+            file: config.logging.trace_file
+        })
+        .withHighestSeverity("trace")
 
-    return bunyan.createLogger(
-    {
-        name: config.general.app_name,
-        streams: [
-        {
-            level: "trace",
-            path: config.logging.trace_file
-        },
-        {
-            type: "raw",
-            level: "debug",
-            stream: new DebugStream()
-        }]
-    })
+    bristol.addTarget("console")
+        .withHighestSeverity("debug")
+
+    return bristol
 }
 
-module.exports.InfoStream = class
+module.exports.ServiceBusLogger = function(options, severity, date, message)
 {
-    constructor(channel, exchange)
-    {
-        this.amqp_channel = channel
-        this.exchange = exchange
-    }
-
-    write(data)
-    {
-        this.amqp_channel.publish(this.exchange, "test123", new Buffer(stringify(data)))
-    }
+    options.channel.publish(options.exchange, "test123", new Buffer(stringify(message)))
 }
 
 module.exports.setupServiceBus = async function(config)

@@ -21,12 +21,12 @@ module.exports = async function()
         let channel = await utils.setupServiceBus(config)
 
         // add service bus connection to logger
-        log.addStream(
-        {
-            type: "raw",
-            level: "info",
-            stream: new utils.InfoStream(channel, config.service_bus.queues.logs.exchange)
-        })
+        log.addTarget(utils.ServiceBusLogger,
+            {
+                channel: channel,
+                exchange: config.service_bus.queues.logs.exchange
+            })
+            .withHighestSeverity(config.service_bus.queues.logs.level)
 
         // test-specific signals
         log.debug("_app_ready")
