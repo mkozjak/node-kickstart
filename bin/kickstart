@@ -138,7 +138,7 @@ function createApplication(name, dir) {
 
     fs.writeFileSync('./package.json', JSON.stringify(package, null, 2))
 
-    // remove a local git repository
+    // remove legacy data
     exec('rm -rf .git bin')
   }
 }
