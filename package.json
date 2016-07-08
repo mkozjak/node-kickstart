@@ -1,7 +1,7 @@
 {
-  "name": "app",
+  "name": "qaap-kickstart",
   "version": "1.0.0",
-  "description": "qaap microservice ECMAScript kickstart",
+  "description": "qaap microservice boilerplate in ECMAScript",
   "main": "dist/index.js",
   "bin": {
     "kickstart": "./bin/kickstart"
@@ -16,7 +16,6 @@
     "type": "https",
     "url": "https://github.com/qaap/kickstart.git"
   },
-  "author": "Mario Kozjak",
   "license": "MIT",
   "homepage": "https://github.com/qaap/kickstart.git",
   "dependencies": {
