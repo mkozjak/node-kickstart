@@ -1,144 +1,169 @@
 #!/usr/bin/env node
 
-var exec = require('child_process').exec
-var fs = require('fs')
+var exec = require("child_process").exec
+var fs = require("fs")
 
 // parse command-line arguments
-var argv = require('yargs')
-  .usage('\nUsage: kickstart [options] [dir]')
-  .option('app-name', {
-    describe: 'New application name',
-    type: 'string',
-    alias: 'n',
-    demand: true
-  })
-  .option('description', {
-    describe: 'Application description',
-    type: 'string',
-    alias: 'd'
-  })
-  .option('repository-url', {
-    describe: 'Git repository URL',
-    type: 'string',
-    alias: 'u'
-  })
-  .option('author', {
-    describe: 'Application author name',
-    type: 'string',
-    alias: 'a'
-  })
-  .option('license', {
-    describe: 'Application license',
-    type: 'string',
-    alias: 'l'
-  })
-  .option('homepage-url', {
-    describe: 'Application homepage URL',
-    type: 'string',
-    alias: 'w'
-  })
-  .option('node-version', {
-    describe: 'package.json-compliant node.js version',
-    type: 'string',
-    alias: 'v'
-  })
-  .option('destination-dir', {
-    describe: 'Application destination directory',
-    type: 'string',
-    alias: 'o'
-  })
-  .help('h').alias('h', 'help')
-  .argv
+var argv = require("yargs")
+    .usage("\nUsage: kickstart [options] [dir]")
+    .option("app-name",
+    {
+        describe: "New application name",
+        type: "string",
+        alias: "n",
+        demand: true
+    })
+    .option("description",
+    {
+        describe: "Application description",
+        type: "string",
+        alias: "d"
+    })
+    .option("repository-url",
+    {
+        describe: "Git repository URL",
+        type: "string",
+        alias: "u"
+    })
+    .option("author",
+    {
+        describe: "Application author name",
+        type: "string",
+        alias: "a"
+    })
+    .option("license",
+    {
+        describe: "Application license",
+        type: "string",
+        alias: "l"
+    })
+    .option("homepage-url",
+    {
+        describe: "Application homepage URL",
+        type: "string",
+        alias: "w"
+    })
+    .option("node-version",
+    {
+        describe: "package.json-compliant node.js version",
+        type: "string",
+        alias: "v"
+    })
+    .option("destination-dir",
+    {
+        describe: "Application destination directory",
+        type: "string",
+        alias: "o"
+    })
+    .help("h").alias("h", "help")
+    .argv
 
-var app_name = argv['app-name']
-var app_path = argv['destination-dir'] || '.'
-var dest_dir = app_path + '/' + app_name
+var app_name = argv["app-name"]
+var app_path = argv["destination-dir"] || "."
+var dest_dir = app_path + "/" + app_name
 var dest_exists = false
 
-var kickstart_url = 'https://github.com/qaap/kickstart'
+var kickstart_url = "https://github.com/qaap/kickstart"
 
-if (!app_name.length) {
-  console.log('\nA valid application name should be provided')
-  process.exit(1)
+if (!app_name.length)
+{
+    console.log("\nA valid application name should be provided")
+    process.exit(1)
 }
 
 // check destination directory
-fs.readdir(dest_dir, function(error, files) {
-  if (error) {
-    if (error.code !== 'ENOENT') {
-      console.log(error)
-      process.exit(1)
+fs.readdir(dest_dir, function(error, files)
+{
+    if (error)
+    {
+        if (error.code !== "ENOENT")
+        {
+            console.log(error)
+            process.exit(1)
+        }
+
+        fs.mkdir(dest_dir, function(error)
+        {
+            if (error)
+            {
+                console.log(error)
+                process.exit(1)
+            }
+
+            createApplication(app_name, dest_dir)
+        })
     }
+    else
+    {
+        if (files && files.length > 0)
+        {
+            console.log("\nApplication destination directory already occupied")
+            process.exit(1)
+        }
 
-    fs.mkdir(dest_dir, function(error) {
-      if (error) {
-        console.log(error)
-        process.exit(1)
-      }
-
-      createApplication(app_name, dest_dir)
-    })
-  }
-  else {
-    if (files && files.length > 0) {
-      console.log('\nApplication destination directory already occupied')
-      process.exit(1)
+        createApplication(app_name, dest_dir)
     }
-
-    createApplication(app_name, dest_dir)
-  }
 })
 
-function createApplication(name, dir) {
-  console.log('\nCreating a new application called "'
-    + name
-    + '" in a directory "'
-    + dir + '"')
+function createApplication(name, dir)
+{
+    console.log("\nCreating a new application called '" +
+        name +
+        "' in a directory '" +
+        dir + "'")
 
-  exec('command -v git', function(error, stdout, stderr) {
-    if (error || stderr) {
-      console.log('Cannot find git command:', error || stderr)
-      process.exit(1)
+    exec("command -v git", function(error, stdout, stderr)
+    {
+        if (error || stderr)
+        {
+            console.log("Cannot find git command:", error || stderr)
+            process.exit(1)
+        }
+
+        fetchKickstart(kickstart_url, stdout.trim())
+    })
+
+    try
+    {
+        process.chdir(dir)
+    }
+    catch (error)
+    {
+        console.log("Failed setting cwd with:", error)
+        process.exit(1)
     }
 
-    fetchKickstart(kickstart_url, stdout.trim())
-  })
+    function fetchKickstart(link, git)
+    {
+        exec(git + " clone " + link + " .", function(error, stdout)
+        {
+            if (error)
+            {
+                console.log("Error fetching kickstart:", error)
+                process.exit(1)
+            }
 
-  try {
-    process.chdir(dir)
-  }
-  catch (error) {
-    console.log('Failed setting cwd with:', error)
-    process.exit(1)
-  }
+            prepareWorkDir()
+        })
+    }
 
-  function fetchKickstart(link, git) {
-    exec(git + ' clone ' + link + ' .', function(error, stdout) {
-      if (error) {
-        console.log('Error fetching kickstart:', error)
-        process.exit(1)
-      }
+    function prepareWorkDir()
+    {
+        // edit package.json
+        var package = JSON.parse(fs.readFileSync("./package.json", "utf8"))
 
-      prepareWorkDir()
-    })
-  }
+        package.name = name
 
-  function prepareWorkDir() {
-    // edit package.json
-    var package = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
+        if (argv["description"]) package.description = argv["description"]
+        if (argv["repository-url"]) package.repository.url = argv["repository-url"]
+        if (argv["author"]) package.author = argv["author"]
+        if (argv["license"]) package.license = argv["license"]
+        if (argv["homepage-url"]) package.homepage = argv["homepage-url"]
+        if (argv["node-version"]) package.engines.node = argv["node-version"]
 
-    package.name = name
+        fs.writeFileSync("./package.json", JSON.stringify(package, null, 2))
 
-    if (argv['description']) package.description = argv['description']
-    if (argv['repository-url']) package.repository.url = argv['repository-url']
-    if (argv['author']) package.author = argv['author']
-    if (argv['license']) package.license = argv['license']
-    if (argv['homepage-url']) package.homepage = argv['homepage-url']
-    if (argv['node-version']) package.engines.node = argv['node-version']
-
-    fs.writeFileSync('./package.json', JSON.stringify(package, null, 2))
-
-    // remove legacy data
-    exec('rm -rf .git bin')
-  }
+        // remove legacy data
+        exec("rm -rf .git bin")
+    }
 }
