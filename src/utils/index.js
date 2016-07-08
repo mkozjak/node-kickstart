@@ -14,7 +14,7 @@ module.exports.setConfig = function(config)
         "config": "object"
     })
 
-    let argv = require('yargs').usage("usage: npm start -- [options]")
+    let argv = require('yargs').usage("Usage: npm start -- [options]")
         .option("service-bus-hostname",
         {
             describe: "service bus hostname",
