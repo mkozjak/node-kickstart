@@ -7,7 +7,6 @@ pids
 *.pid
 *.seed
 
-bin/
 dist/
 db/
 
