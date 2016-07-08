@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "qaap microservice ECMAScript kickstart",
   "main": "dist/index.js",
+  "bin": {
+    "kickstart": "./bin/kickstart"
+  },
   "scripts": {
     "preinstall": "mkdir -p dist",
     "postinstall": "bash tools/beautify_source.sh && ./node_modules/babel-cli/bin/babel.js src -d dist",
