@@ -196,7 +196,7 @@ describe("# basic functionality", function()
                 done()
             }, function()
             {
-                done(new Error("failed starting rabbitmq"))
+                done(new Error("failed starting rethinkdb"))
             })
         }, function(error)
         {
