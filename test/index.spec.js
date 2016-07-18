@@ -5,6 +5,7 @@ const config = require("../src/config")
 const Docker = require("dockerode")
 const exec = require("child_process").exec
 const fs = require("fs")
+const net = require("net")
 const os = require("os")
 const pkg = require("../package.json")
 const fork = require("child_process").fork
@@ -166,7 +167,16 @@ describe("# basic functionality", function()
         runContainer("rabbitmq", "latest", "rabbitmq").then(function(id)
         {
             rmq_id = id
-            done()
+
+            checkService(
+                url.parse(process.env.DOCKER_HOST).hostname,
+                config.service_bus.port).then(function()
+            {
+                done()
+            }, function()
+            {
+                done(new Error("failed starting rabbitmq"))
+            })
         }, function(error)
         {
             done(error)
@@ -178,7 +188,16 @@ describe("# basic functionality", function()
         runContainer("rethinkdb", "latest", "rethinkdb").then(function(id)
         {
             rdb_id = id
-            done()
+
+            checkService(
+                url.parse(process.env.DOCKER_HOST).hostname,
+                config.database.port).then(function()
+            {
+                done()
+            }, function()
+            {
+                done(new Error("failed starting rabbitmq"))
+            })
         }, function(error)
         {
             done(error)
@@ -465,5 +484,43 @@ function runContainer(image_name, tag, container_name)
                 })
             }
         })
+    })
+}
+
+function checkService(host, port)
+{
+    return new Promise(function(resolve, reject)
+    {
+        let check = 0
+
+        let connect = function()
+        {
+            let sock = new net.Socket()
+
+            sock.connect(
+            {
+                host: host,
+                port: port
+            }, function()
+            {
+                resolve()
+            })
+
+            sock.on('error', function() {})
+
+            sock.once('close', function()
+            {
+                if (check < 5)
+                {
+                    check++
+                    setTimeout(connect, 1000)
+                    return
+                }
+
+                reject()
+            })
+        }
+
+        connect()
     })
 }
