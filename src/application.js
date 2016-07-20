@@ -1,7 +1,6 @@
 'use strict'
 
 const config = require("./config")
-const rethinkdb = require("rethinkdb")
 const utils = require("./utils")
 
 module.exports = async function()
