@@ -7,9 +7,9 @@
     "kickstart": "./bin/kickstart"
   },
   "scripts": {
-    "preinstall": "mkdir -p dist",
-    "postinstall": "bash tools/beautify_source.sh && ./node_modules/babel-cli/bin/babel.js src -d dist",
+    "pretest": "mkdir -p dist && bash ./tools/beautify_source.sh && ./node_modules/babel-cli/bin/babel.js src -d ./dist",
     "test": "./node_modules/mocha/bin/mocha test/*spec.js",
+    "prestart": "mkdir -p dist && bash ./tools/beautify_source.sh && ./node_modules/babel-cli/bin/babel.js src -d ./dist",
     "start": "node dist/index.js"
   },
   "repository": {
