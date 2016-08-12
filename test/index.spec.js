@@ -173,9 +173,9 @@ describe("# basic functionality", function()
                 config.service_bus.port).then(function()
             {
                 done()
-            }, function()
+            }, function(error)
             {
-                done(new Error("failed starting rabbitmq"))
+                done(new Error("failed starting rabbitmq: " + error.toString()))
             })
         }, function(error)
         {
@@ -194,9 +194,9 @@ describe("# basic functionality", function()
                 config.database.port).then(function()
             {
                 done()
-            }, function()
+            }, function(error)
             {
-                done(new Error("failed starting rethinkdb"))
+                done(new Error("failed starting rethinkdb: " + error.toString()))
             })
         }, function(error)
         {
@@ -506,7 +506,11 @@ function checkService(host, port)
                 resolve()
             })
 
-            sock.on('error', function() {})
+            sock.on('error', function(error)
+            {
+                if (error.code === "ECONNREFUSED")
+                    reject(error)
+            })
 
             sock.once('close', function()
             {
