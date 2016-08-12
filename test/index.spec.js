@@ -65,7 +65,7 @@ describe("# basic functionality", function()
                     else
                     {
                         if (stdout.trim() !== "Running")
-                            return done(new Error("docker service not running!"))
+                            return done(new Error("docker service not running! Use docker-machine to start it."))
 
                         if (!process.env.DOCKER_HOST)
                         {
@@ -149,7 +149,7 @@ describe("# basic functionality", function()
                 exec("systemctl status docker", function(error, _, stderr)
                 {
                     if (error && error.code !== 0)
-                        return done(new Error("docker service not running!"))
+                        return done(new Error("docker service not running! Use systemctl to start it."))
 
                     if (stderr)
                         return done(stderr)
