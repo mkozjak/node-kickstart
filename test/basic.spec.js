@@ -322,7 +322,8 @@ describe("# basic functionality", function()
         {
             connection.createChannel().then(function(channel)
             {
-                var ok = channel.assertExchange(config.service_bus.queues.logs.exchange, "topic")
+                let ok = channel.assertExchange(config.service_bus.queues.logs.exchange, "topic")
+                let lock = false
 
                 ok = ok.then(function()
                 {
@@ -331,7 +332,7 @@ describe("# basic functionality", function()
 
                 ok = ok.then(function(qok)
                 {
-                    var queue = qok.queue
+                    let queue = qok.queue
 
                     return channel.bindQueue(queue, config.service_bus.queues.logs.exchange, "test123").then(function()
                     {
@@ -346,7 +347,11 @@ describe("# basic functionality", function()
                         if (!message.content)
                             return done(new Error("got a malformed log entry"))
 
-                        done()
+                        if (!lock)
+                        {
+                            lock = true
+                            done()
+                        }
                     },
                     {
                         noAck: true
