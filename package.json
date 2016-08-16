@@ -8,7 +8,7 @@
   },
   "scripts": {
     "pretest": "mkdir -p dist && bash ./tools/beautify_source.sh && ./node_modules/babel-cli/bin/babel.js src -d ./dist",
-    "test": "./node_modules/mocha/bin/mocha test/*spec.js",
+    "test": "./node_modules/mocha/bin/mocha test/index.spec.js",
     "prestart": "mkdir -p dist && bash ./tools/beautify_source.sh && ./node_modules/babel-cli/bin/babel.js src -d ./dist",
     "start": "node dist/index.js"
   },
