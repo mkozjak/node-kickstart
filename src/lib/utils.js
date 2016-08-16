@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 const amqp = require("amqplib")
 const assertArgs = require("assert-args")

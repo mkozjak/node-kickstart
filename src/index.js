@@ -1,4 +1,4 @@
-'use strict'
+"use strict"
 
 const application = require("./lib/application")
 const Promise = require("bluebird")
