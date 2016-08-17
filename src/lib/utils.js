@@ -128,8 +128,6 @@ module.exports.setupServiceBus = async function(config)
                             await channel.assertExchange(queues[name].exchange, "topic")
                             break
                     }
-
-                    return channel
                 }
                 catch (error)
                 {
@@ -147,7 +145,7 @@ module.exports.setupServiceBus = async function(config)
                 throw new Error("channel closed")
             })
 
-            break
+            return channel
     }
 }
 
