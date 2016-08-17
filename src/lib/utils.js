@@ -153,12 +153,17 @@ module.exports.setupServiceBus = async function(config)
 
 module.exports.setupDatabase = async function(config)
 {
+    assertArgs(arguments,
+    {
+        "config": "object"
+    })
+
     switch (config.database.type)
     {
         case "rethinkdb":
             try
             {
-                let connection = await rethinkdb.connect(
+                return await rethinkdb.connect(
                 {
                     host: config.database.hostname,
                     port: config.database.port,
@@ -171,7 +176,5 @@ module.exports.setupDatabase = async function(config)
             {
                 throw error
             }
-
-            break
     }
 }
