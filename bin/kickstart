@@ -144,6 +144,8 @@ function createApplication(name, dir)
             }
 
             prepareWorkDir()
+
+	    console.log("Done!")
         })
     }
 
