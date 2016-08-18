@@ -276,7 +276,16 @@ describe("# basic functionality", function()
 
             app.stdout.on("data", function(data)
             {
-                let message = JSON.parse(data.toString()).message
+                let message = null
+
+                try
+                {
+                    message = JSON.parse(data.toString()).message
+                }
+                catch (error)
+                {
+                    // ignore messages other than JSON
+                }
 
                 if (message === "_app_ready")
                 {
