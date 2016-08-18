@@ -295,19 +295,9 @@ describe("# basic functionality", function()
                 console.log("  @ npm test debugging output:", message)
             })
 
-            app.on("close", function(code, signal)
-            {
-                done(new Error("app closed with code " + code))
-            })
-
             app.on("error", function(error)
             {
                 done(error)
-            })
-
-            app.on("exit", function(code, signal)
-            {
-                done(new Error("app exited with code " + code))
             })
         })
     })
