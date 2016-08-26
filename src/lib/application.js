@@ -11,24 +11,27 @@ module.exports = async function()
     // parse command-line arguments
     utils.setConfig(config)
 
+    // variables store for forwarding further
+    const _env = {}
+
     // setup logging
-    const log = utils.setLogging(config)
+    _env.log = utils.setLogging(config)
 
     // setup service bus connection
     try
     {
-        let channel = await utils.setupServiceBus(config)
+        _env.amqp = await utils.setupServiceBus(config)
 
         // add service bus connection to logger
-        log.addTarget(utils.ServiceBusLogger,
+        _env.log.addTarget(utils.ServiceBusLogger,
             {
-                channel: channel,
+                channel: _env.amqp,
                 exchange: config.service_bus.queues.logs.exchange
             })
             .withHighestSeverity(config.logging.service_bus.level)
 
         // test-specific signals
-        log.debug("_app_ready")
+        _env.log.debug("_app_ready")
     }
     catch (error)
     {
@@ -38,7 +41,7 @@ module.exports = async function()
     // setup database connection
     try
     {
-        await utils.setupDatabase(config)
+        _env.db = await utils.setupDatabase(config)
     }
     catch (error)
     {
