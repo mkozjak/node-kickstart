@@ -510,9 +510,9 @@ function checkService(host, port)
                 resolve()
             })
 
-            sock.on('error', function(error)
+            sock.once('error', function(error)
             {
-                if (error.code === "ECONNREFUSED")
+                if (error.code === "ECONNREFUSED" && check >= 5)
                     reject(error)
             })
 
