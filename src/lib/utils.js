@@ -7,6 +7,21 @@ const rethinkdb = require("rethinkdb")
 const stringify = require("json-stringify-safe")
 const url = require("url")
 
+module.exports.checkEnvVars = function(value)
+{
+    if (typeof(value) !== "object")
+        throw new Error("env should be an object")
+
+    if (!value.log && this !== "logger")
+        throw new Error("env.log is required")
+
+    if (!value.amqp && this !== "service-bus")
+        throw new Error("env.amqp is required")
+
+    if (!value.db && this !== "database")
+        throw new Error("env.db is required")
+}
+
 module.exports.setConfig = function(config)
 {
     assertArgs(arguments,
@@ -146,33 +161,5 @@ module.exports.setupServiceBus = async function(config)
             })
 
             return channel
-    }
-}
-
-module.exports.setupDatabase = async function(config)
-{
-    assertArgs(arguments,
-    {
-        "config": "object"
-    })
-
-    switch (config.database.type)
-    {
-        case "rethinkdb":
-            try
-            {
-                return await rethinkdb.connect(
-                {
-                    host: config.database.hostname,
-                    port: config.database.port,
-                    db: config.database.name,
-                    user: config.database.username,
-                    password: config.database.password
-                })
-            }
-            catch (error)
-            {
-                throw error
-            }
     }
 }

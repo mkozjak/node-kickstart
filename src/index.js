@@ -9,6 +9,7 @@ main()
 async function main()
 {
     const config = require("./config")
+    const Database = require("./lib/database")
     const utils = require("./lib/utils")
 
     // fetch configuration
@@ -47,7 +48,8 @@ async function main()
     // setup database connection
     try
     {
-        _env.db = await utils.setupDatabase(config)
+        let db = new Database(_env, config.database)
+        _env.db = await db.connect()
     }
     catch (error)
     {
