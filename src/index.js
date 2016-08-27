@@ -10,6 +10,7 @@ async function main()
 {
     const config = require("./config")
     const Database = require("./lib/database")
+    const ServiceBus = require("./lib/service_bus")
     const utils = require("./lib/utils")
 
     // fetch configuration
@@ -27,8 +28,11 @@ async function main()
     // setup service bus connection
     try
     {
-        _env.amqp = await utils.setupServiceBus(config)
+        // _env.amqp = await utils.setupServiceBus(config)
+        let sb = new ServiceBus(_env, config.service_bus)
+        _env.amqp = await sb.connect()
 
+        /*
         // add service bus connection to logger
         _env.log.addTarget(utils.ServiceBusLogger,
             {
@@ -39,6 +43,7 @@ async function main()
 
         // test-specific signals
         _env.log.debug("_app_ready")
+        */
     }
     catch (error)
     {

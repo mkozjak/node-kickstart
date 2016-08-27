@@ -10,7 +10,7 @@ module.exports = class Database
     {
         let args = assertArgs(arguments,
         {
-            "env": utils.checkEnvVars.bind("database"),
+            "env": "object",
             "[config]": "object"
         })
 
