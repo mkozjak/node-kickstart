@@ -25,7 +25,7 @@ module.exports = class Database
             case "rethinkdb":
                 try
                 {
-                    return await rethinkdb.connect(
+                    this.connection = await rethinkdb.connect(
                     {
                         host: this.config.hostname,
                         port: this.config.port,
@@ -33,6 +33,8 @@ module.exports = class Database
                         user: this.config.username,
                         password: this.config.password
                     })
+
+                    return this.connection
                 }
                 catch (error)
                 {
@@ -40,5 +42,4 @@ module.exports = class Database
                 }
         }
     }
-
 }
