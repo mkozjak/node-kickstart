@@ -42,7 +42,7 @@ module.exports = class ServiceBus
                     throw error
                 }
 
-                let channel = await connection.createChannel()
+                this.channel = await connection.createChannel()
                 let queues = this.config.queues
 
                 for (let name in queues)
@@ -53,7 +53,7 @@ module.exports = class ServiceBus
                         {
                             // push -> only one consumer takes the job
                             case "push":
-                                await channel.assertExchange(queues[name].exchange, "topic")
+                                await this.channel.assertExchange(queues[name].exchange, "topic")
                                 break
                         }
                     }
@@ -63,18 +63,17 @@ module.exports = class ServiceBus
                     }
                 }
 
-                channel.on("error", (error) =>
+                this.channel.on("error", (error) =>
                 {
                     throw error
                 })
 
-                channel.on("close", () =>
+                this.channel.on("close", () =>
                 {
                     throw new Error("channel closed")
                 })
 
-                return channel
+                return this.channel
         }
     }
-
 }

@@ -1,11 +1,8 @@
 "use strict"
 
-const amqp = require("amqplib")
 const assertArgs = require("assert-args")
 const bristol = require("bristol")
-const rethinkdb = require("rethinkdb")
 const stringify = require("json-stringify-safe")
-const url = require("url")
 
 module.exports.checkEnvVars = function(value)
 {

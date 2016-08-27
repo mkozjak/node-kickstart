@@ -28,22 +28,19 @@ async function main()
     // setup service bus connection
     try
     {
-        // _env.amqp = await utils.setupServiceBus(config)
-        let sb = new ServiceBus(_env, config.service_bus)
-        _env.amqp = await sb.connect()
+        let service_bus = new ServiceBus(_env, config.service_bus)
+        _env.sb_connection = await service_bus.connect()
 
-        /*
         // add service bus connection to logger
         _env.log.addTarget(utils.ServiceBusLogger,
             {
-                channel: _env.amqp,
+                channel: _env.sb_connection,
                 exchange: config.service_bus.queues.logs.exchange
             })
             .withHighestSeverity(config.logging.service_bus.level)
 
         // test-specific signals
         _env.log.debug("_app_ready")
-        */
     }
     catch (error)
     {
