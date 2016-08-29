@@ -17,6 +17,9 @@ module.exports = class Database
 
         this.env = args.env
         this.config = args.config
+
+        this.r = null
+        this.models = {}
     }
 
     async initialize()
