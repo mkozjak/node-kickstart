@@ -42,6 +42,7 @@ module.exports = class Database
 
                     this.models = this._loadModels()
 
+                    await this.r.dbReady()
                     return this.r
                 }
                 catch (error)
