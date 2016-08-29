@@ -51,7 +51,7 @@ async function main()
     try
     {
         let db = new Database(_env, config.database)
-        _env.db = await db.connect()
+        _env.db = await db.initialize()
     }
     catch (error)
     {
