@@ -41,6 +41,7 @@ module.exports = class Database
                     })
 
                     this.models = this._loadModels()
+                    this._setRelations()
 
                     await this.r.dbReady()
                     return this.r
@@ -69,4 +70,6 @@ module.exports = class Database
             return this.models
         }
     }
+
+    _setRelations() {}
 }
