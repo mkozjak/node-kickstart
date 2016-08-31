@@ -23,6 +23,7 @@
     "bluebird": "^3.3.4",
     "bristol": "^0.3.3",
     "json-stringify-safe": "^5.0.1",
+    "node-uuid": "^1.4.7",
     "thinky": "^2.3.6",
     "yargs": "^4.7.1"
   },
