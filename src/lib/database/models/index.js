@@ -1,3 +1,3 @@
 "use strict"
 
-module.exports = function(r) {}
+module.exports = function(r, recreate) {}

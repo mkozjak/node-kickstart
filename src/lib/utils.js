@@ -52,6 +52,11 @@ module.exports.setConfig = function(config)
             describe: "database hostname",
             type: "string"
         })
+        .option("database-recreate",
+        {
+            describe: "drop and recreate existing database tables",
+            type: "string"
+        })
         .help("h")
         .alias("h", "help")
         .argv
@@ -70,6 +75,9 @@ module.exports.setConfig = function(config)
 
     if (argv["database-hostname"])
         config.database.hostname = argv["database-hostname"]
+
+    if (argv["database-recreate"])
+        config.database.recreate = argv["database-recreate"]
 
     return argv
 }

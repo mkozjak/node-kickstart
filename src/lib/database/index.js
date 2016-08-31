@@ -60,7 +60,7 @@ module.exports = class Database
             if (file.indexOf(".") === 0 || file.indexOf(".swp") !== -1)
                 continue
 
-            let model = require(__dirname + "/models/" + file)(this.r)
+            let model = require(__dirname + "/models/" + file)(this.r, this.config.recreate)
 
             if (!model)
                 continue
