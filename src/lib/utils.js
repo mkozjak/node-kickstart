@@ -57,6 +57,11 @@ module.exports.setConfig = function(config)
             describe: "drop and recreate existing database tables",
             type: "string"
         })
+        .option("database-initial-data",
+        {
+            describe: "fill database tables with initial data",
+            type: "string"
+        })
         .help("h")
         .alias("h", "help")
         .argv
@@ -78,6 +83,9 @@ module.exports.setConfig = function(config)
 
     if (argv["database-recreate"])
         config.database.recreate = argv["database-recreate"]
+
+    if (argv["database-initial-data"])
+        config.database.initial_data = argv["database-initial-data"]
 
     return argv
 }
@@ -103,5 +111,5 @@ module.exports.setLogging = function(config)
 
 module.exports.ServiceBusLogger = function(options, severity, date, message)
 {
-    options.channel.publish(options.exchange, "test123", new Buffer(stringify(message)))
+    options.channel.publish(options.subject, message)
 }

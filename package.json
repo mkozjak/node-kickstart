@@ -18,11 +18,11 @@
   "license": "MIT",
   "homepage": "https://github.com/qaap/kickstart.git",
   "dependencies": {
-    "amqplib": "^0.4.2",
     "assert-args": "^1.1.2",
     "bluebird": "^3.3.4",
     "bristol": "^0.3.3",
     "json-stringify-safe": "^5.0.1",
+    "nats": "^0.6.4",
     "node-uuid": "^1.4.7",
     "thinky": "^2.3.6",
     "yargs": "^4.7.1"

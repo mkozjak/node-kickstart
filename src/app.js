@@ -35,7 +35,7 @@ async function main()
         _env.log.addTarget(utils.ServiceBusLogger,
             {
                 channel: _env.sb_connection,
-                exchange: config.service_bus.queues.logs.exchange
+                subject: config.service_bus.queues.logs.subject
             })
             .withHighestSeverity(config.logging.service_bus.level)
 

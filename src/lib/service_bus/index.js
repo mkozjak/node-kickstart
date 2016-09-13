@@ -1,8 +1,9 @@
 "use strict"
 
-const amqp = require("amqplib")
 const assertArgs = require("assert-args")
+const nats = require("nats")
 const url = require("url")
+
 const utils = require("../utils")
 
 module.exports = class ServiceBus
@@ -23,6 +24,28 @@ module.exports = class ServiceBus
     {
         switch (this.config.type)
         {
+            case "nats":
+                try
+                {
+                    this.connection = nats.connect(url.format(
+                    {
+                        protocol: this.config.protocol,
+                        hostname: this.config.hostname,
+                        port: this.config.port,
+                        slashes: true
+                    }))
+
+                    // set connection handlers
+                    await this._handlers()
+                    return this.connection
+                }
+                catch (error)
+                {
+                    throw error
+                }
+
+                break
+
             case "rabbitmq":
                 let connection = null
 
@@ -76,4 +99,7 @@ module.exports = class ServiceBus
                 return this.channel
         }
     }
+
+    async _handlers()
+    {}
 }

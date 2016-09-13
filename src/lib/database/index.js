@@ -71,5 +71,6 @@ module.exports = class Database
         }
     }
 
-    _setRelations() {}
+    _setRelations()
+    {}
 }
