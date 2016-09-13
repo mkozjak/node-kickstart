@@ -21,6 +21,7 @@ async function main()
 
     // variables store for forwarding further
     const _env = {}
+    let service_bus = null
 
     // setup logging
     _env.log = utils.setLogging(config)
@@ -28,7 +29,7 @@ async function main()
     // setup service bus connection
     try
     {
-        let service_bus = new ServiceBus(_env, config.service_bus)
+        service_bus = new ServiceBus(_env, config.service_bus)
         _env.sb = await service_bus.connect()
 
         // add service bus connection to logger
@@ -58,6 +59,14 @@ async function main()
         throw error
     }
 
+    // start handling requests
+    await service_bus.handleRequests()
+
+    // send a signal that the app has started
+    setImmediate(function()
+    {
+        _env.log.debug("_app_ready")
+    })
 }
 
 Promise.onPossiblyUnhandledRejection(function(error)

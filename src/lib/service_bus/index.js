@@ -4,6 +4,7 @@ const assertArgs = require("assert-args")
 const nats = require("nats")
 const url = require("url")
 
+const handlers = require("./handlers")
 const utils = require("../utils")
 
 module.exports = class ServiceBus
@@ -35,8 +36,6 @@ module.exports = class ServiceBus
                         slashes: true
                     }))
 
-                    // set connection handlers
-                    await this._handlers()
                     return this.connection
                 }
                 catch (error)
@@ -100,6 +99,11 @@ module.exports = class ServiceBus
         }
     }
 
-    async _handlers()
-    {}
+    async handleRequests()
+    {
+        for (let name in handlers)
+        {
+            await handlers[name].call(this.env)
+        }
+    }
 }
