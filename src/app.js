@@ -29,12 +29,12 @@ async function main()
     try
     {
         let service_bus = new ServiceBus(_env, config.service_bus)
-        _env.sb_connection = await service_bus.connect()
+        _env.sb = await service_bus.connect()
 
         // add service bus connection to logger
         _env.log.addTarget(utils.ServiceBusLogger,
             {
-                channel: _env.sb_connection,
+                channel: _env.sb,
                 subject: config.service_bus.queues.logs.subject
             })
             .withHighestSeverity(config.logging.service_bus.level)
