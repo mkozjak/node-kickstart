@@ -39,9 +39,6 @@ async function main()
                 subject: config.service_bus.queues.logs.subject
             })
             .withHighestSeverity(config.logging.service_bus.level)
-
-        // test-specific signals
-        _env.log.debug("_app_ready")
     }
     catch (error)
     {
