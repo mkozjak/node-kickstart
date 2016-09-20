@@ -300,6 +300,12 @@ describe("# basic functionality", function()
             {
                 done(error)
             })
+
+            app.on("close", function()
+            {
+                console.log(new Error("app closed prematurely"))
+                process.exit(1)
+            })
         })
     })
 
