@@ -30,7 +30,7 @@ args = cli.parse_args()
 c = r.connect(db="rethinkdb", host=args.db_hostname)
 
 if args.db_name not in r.db_list().run(c):
-    r.db_create('iptv').run(c)
+    r.db_create(args.db_name).run(c)
 
 r.db("rethinkdb").table("users").insert({
     "id": args.db_user_name,
