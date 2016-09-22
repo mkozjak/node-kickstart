@@ -31,9 +31,6 @@ describe("# basic functionality", function()
 {
     this.timeout(300000)
 
-    let nats_id = null,
-        rdb_id = null
-
     before("check if docker service is running", function(done)
     {
         switch (os.platform())
@@ -167,7 +164,7 @@ describe("# basic functionality", function()
     {
         runContainer("nats", "latest", "nats").then(function(id)
         {
-            nats_id = id
+            global.nats_id = id
 
             checkService(
                 url.parse(process.env.DOCKER_HOST).hostname,
@@ -188,7 +185,7 @@ describe("# basic functionality", function()
     {
         runContainer("rethinkdb", "latest", "rethinkdb").then(function(id)
         {
-            rdb_id = id
+            global.rdb_id = id
 
             checkService(
                 url.parse(process.env.DOCKER_HOST).hostname,
@@ -202,50 +199,6 @@ describe("# basic functionality", function()
         }, function(error)
         {
             done(error)
-        })
-    })
-
-    after("stop nats server", function(done)
-    {
-        if (!nats_id)
-            return done()
-
-        let container = docker.getContainer(nats_id)
-
-        container.stop(function(error)
-        {
-            if (error)
-                return done(error)
-
-            container.remove(function(error)
-            {
-                if (error)
-                    return done(error)
-
-                done()
-            })
-        })
-    })
-
-    after("stop rethinkdb server", function(done)
-    {
-        if (!rdb_id)
-            return done()
-
-        let container = docker.getContainer(rdb_id)
-
-        container.stop(function(error)
-        {
-            if (error)
-                return done(error)
-
-            container.remove(function(error)
-            {
-                if (error)
-                    return done(error)
-
-                done()
-            })
         })
     })
 
@@ -301,18 +254,8 @@ describe("# basic functionality", function()
                 done(error)
             })
 
-            app.on("close", function()
-            {
-                console.log(new Error("app closed prematurely"))
-                process.exit(1)
-            })
+            app.on("close", closeHandler)
         })
-    })
-
-    after("stop microservice", function()
-    {
-        if (app !== null)
-            app.kill("SIGKILL")
     })
 
     it("done", function(done)
@@ -505,4 +448,10 @@ function checkService(host, port)
 
         connect()
     })
+}
+
+global.closeHandler = function()
+{
+    console.log(new Error("app closed prematurely"))
+    process.exit(1)
 }
