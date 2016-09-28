@@ -8,7 +8,7 @@ const os = require("os")
 const fork = require("child_process").fork
 const url = require("url")
 
-const config = require("../src/config")
+const config = require("../dist/config")
 const Docker = require("dockerode")
 const pkg = require("../package.json")
 

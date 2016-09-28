@@ -4,7 +4,7 @@ const assertArgs = require("assert-args")
 const bristol = require("bristol")
 const stringify = require("json-stringify-safe")
 
-module.exports.checkEnvVars = function(value)
+function checkEnvVars(value)
 {
     if (typeof(value) !== "object")
         throw new Error("env should be an object")
@@ -19,7 +19,7 @@ module.exports.checkEnvVars = function(value)
         throw new Error("env.db is required")
 }
 
-module.exports.setConfig = function(config)
+function setConfig(config)
 {
     assertArgs(arguments,
     {
@@ -90,7 +90,7 @@ module.exports.setConfig = function(config)
     return argv
 }
 
-module.exports.setLogging = function(config)
+function setLogging(config)
 {
     assertArgs(arguments,
     {
@@ -109,7 +109,15 @@ module.exports.setLogging = function(config)
     return bristol
 }
 
-module.exports.ServiceBusLogger = function(options, severity, date, message)
+function ServiceBusLogger(options, severity, date, message)
 {
     options.channel.publish(options.subject, message)
+}
+
+export
+{
+    checkEnvVars,
+    setConfig,
+    setLogging,
+    ServiceBusLogger
 }

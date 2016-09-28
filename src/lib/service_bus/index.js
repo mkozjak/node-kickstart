@@ -7,7 +7,7 @@ const url = require("url")
 const handlers = require("./handlers")
 const utils = require("../utils")
 
-module.exports = class ServiceBus
+export default class ServiceBus
 {
     constructor(env, config)
     {

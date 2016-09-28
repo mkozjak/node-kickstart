@@ -1,10 +1,10 @@
 "use strict"
 
-module.exports.general = {
+const general = {
     app_name: "kickstart"
 }
 
-module.exports.service_bus = {
+const service_bus = {
     type: "nats",
     protocol: "nats",
     hostname: "localhost",
@@ -20,7 +20,7 @@ module.exports.service_bus = {
     }
 }
 
-module.exports.database = {
+const database = {
     type: "rethinkdb",
     name: "test",
     hostname: "localhost",
@@ -29,7 +29,7 @@ module.exports.database = {
     password: ""
 }
 
-module.exports.logging = {
+const logging = {
     service_bus:
     {
         queue_name: "logs",
@@ -44,4 +44,12 @@ module.exports.logging = {
         output: "logs/trace.log",
         level: "trace"
     }
+}
+
+export
+{
+    general,
+    service_bus,
+    database,
+    logging
 }

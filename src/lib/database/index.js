@@ -5,7 +5,7 @@ const readdir = require("fs").readdirSync
 const thinky = require("thinky")
 const utils = require("../utils")
 
-module.exports = class Database
+export default class Database
 {
     constructor(env, config)
     {
