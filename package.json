@@ -7,7 +7,7 @@
     "kickstart": "./bin/kickstart"
   },
   "scripts": {
-    "postinstall": "mkdir -p dist && eslint --fix -c ./.eslintrc.json ./src/*.js ./test/*.js && babel src -d ./dist",
+    "postinstall": "mkdir -p dist && eslint --fix -c ./.eslintrc.json './src/**/*.js' './test/**/*.js' && babel src -d ./dist",
     "test": "./node_modules/mocha/bin/mocha test/index.spec.js",
     "start": "node dist/app.js"
   },
