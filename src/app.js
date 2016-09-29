@@ -1,6 +1,11 @@
 "use strict"
 
-const Promise = require("bluebird")
+import Promise from "bluebird"
+
+import config from "./config"
+import Database from "./lib/database"
+import ServiceBus from "./lib/service_bus"
+import utils from "./lib/utils"
 
 require("babel-runtime/core-js/promise").default = Promise
 
@@ -12,11 +17,6 @@ main()
  */
 async function main()
 {
-    const config = require("./config")
-    const Database = require("./lib/database")
-    const ServiceBus = require("./lib/service_bus")
-    const utils = require("./lib/utils")
-
     // fetch configuration
     // TODO: try getting conf from remote (kubernetes/rancher metadata/docker swarm?)
 

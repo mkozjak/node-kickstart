@@ -1,11 +1,11 @@
 "use strict"
 
-const assertArgs = require("assert-args")
-const nats = require("nats")
-const url = require("url")
+import assertArgs from "assert-args"
+import nats from "nats"
+import url from "url"
 
-const handlers = require("./handlers")
-const utils = require("../utils")
+import handlers from "./handlers"
+import utils from "../utils"
 
 export default class ServiceBus
 {

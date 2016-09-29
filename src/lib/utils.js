@@ -1,8 +1,8 @@
 "use strict"
 
-const assertArgs = require("assert-args")
-const bristol = require("bristol")
-const stringify = require("json-stringify-safe")
+import assertArgs from "assert-args"
+import bristol from "bristol"
+import stringify from "json-stringify-safe"
 
 function checkEnvVars(value)
 {

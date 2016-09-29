@@ -1,9 +1,9 @@
 "use strict"
 
-const assertArgs = require("assert-args")
-const readdir = require("fs").readdirSync
-const thinky = require("thinky")
-const utils = require("../utils")
+import assertArgs from "assert-args"
+import { readdirSync as readdir } from "fs"
+import thinky from "thinky"
+import utils from "../utils"
 
 export default class Database
 {
