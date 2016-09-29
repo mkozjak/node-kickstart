@@ -4,8 +4,8 @@ import assertArgs from "assert-args"
 import nats from "nats"
 import url from "url"
 
-import handlers from "./handlers"
-import utils from "../utils"
+import * as handlers from "./handlers"
+import * as utils from "../utils"
 
 export default class ServiceBus
 {
