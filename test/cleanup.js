@@ -16,7 +16,7 @@ describe("# cleanup", function()
         if (!global.nats_id)
             return done()
 
-        let container = global.docker.getContainer(global.nats_id)
+        const container = global.docker.getContainer(global.nats_id)
 
         container.stop(function(error)
         {
@@ -38,7 +38,7 @@ describe("# cleanup", function()
         if (!global.rdb_id)
             return done()
 
-        let container = docker.getContainer(global.rdb_id)
+        const container = global.docker.getContainer(global.rdb_id)
 
         container.stop(function(error)
         {

@@ -1,8 +1,9 @@
+/* eslint no-inner-declarations: 0 */
+
 "use strict"
 
 const exec = require("child_process").exec
 const fs = require("fs")
-const nats = require("nats")
 const net = require("net")
 const os = require("os")
 const fork = require("child_process").fork
@@ -35,7 +36,8 @@ describe("# basic functionality", function()
     {
         switch (os.platform())
         {
-            case "darwin":
+        case "darwin":
+            {
                 const docker_machine = "/usr/local/bin/docker-machine"
 
                 // check if docker host is running
@@ -47,23 +49,24 @@ describe("# basic functionality", function()
                         {
                             // create a new docker host
                             createDockerHost().then(function()
-                                {
-                                    console.log(" done")
+                            {
+                                console.log(" done")
 
-                                    // set docker environment variables
-                                    setEnvVars().then(done)
-                                })
-                                .catch(function(error)
+                                // set docker environment variables
+                                setEnvVars().then(done)
+                            })
+                            .catch(function(error)
                                 {
-                                    done(error)
-                                })
+                                done(error)
+                            })
                         }
                         else return done(error)
                     }
                     else
                     {
                         if (stdout.trim() !== "Running")
-                            return done(new Error("docker service not running! Use docker-machine to start it."))
+                            return done(new Error("docker service not running! " +
+                                  "Use docker-machine to start it."))
 
                         if (!process.env.DOCKER_HOST)
                         {
@@ -78,20 +81,24 @@ describe("# basic functionality", function()
                     }
                 })
 
+                /**
+                 * Create a new Docker Host.
+                 * @return {Promise}
+                 */
                 function createDockerHost()
                 {
                     return new Promise(function(resolve, reject)
                     {
                         process.stdout.write("  ==> creating a new virtualbox vm ")
 
-                        let dots = setInterval(function()
+                        const dots = setInterval(function()
                         {
                             process.stdout.write(".")
                         }, 2000)
 
                         exec(`${docker_machine} create -d virtualbox ` +
-                            `--virtualbox-memory 2048 --virtualbox-disk-size 204800 default`,
-                            function(error, stdout, stderr)
+                            "--virtualbox-memory 2048 --virtualbox-disk-size 204800 default",
+                            function(error)
                             {
                                 if (error)
                                     return reject(error)
@@ -102,6 +109,10 @@ describe("# basic functionality", function()
                     })
                 }
 
+                /**
+                 * Set environment variables.
+                 * @return {Promise}
+                 */
                 function setEnvVars()
                 {
                     return new Promise(function(resolve, reject)
@@ -111,12 +122,12 @@ describe("# basic functionality", function()
                             if (error)
                                 return reject(error)
 
-                            for (let line of stdout.split("\n"))
+                            for (const line of stdout.split("\n"))
                             {
                                 if (line.indexOf("export ") === -1)
                                     continue
 
-                                let entry = line.split("export ").pop().split("=")
+                                const entry = line.split("export ").pop().split("=")
                                 process.env[entry[0]] = entry[1].replace(/"/g, "")
                             }
 
@@ -126,7 +137,7 @@ describe("# basic functionality", function()
 
                             // we need to set env vars after
                             // the Docker object has been instantiated
-                            let cert_path = process.env["DOCKER_CERT_PATH"]
+                            const cert_path = process.env["DOCKER_CERT_PATH"]
 
                             docker.modem.host = url.parse(process.env.DOCKER_HOST).hostname
                             docker.modem.port = url.parse(process.env.DOCKER_HOST).port
@@ -142,12 +153,15 @@ describe("# basic functionality", function()
                 }
 
                 break
+            }
 
-            case "linux":
+        case "linux":
+            {
                 exec("systemctl status docker", function(error, _, stderr)
                 {
                     if (error && error.code !== 0)
-                        return done(new Error("docker service not running! Use systemctl to start it."))
+                        return done(new Error("docker service not running! " +
+                              "Use systemctl to start it."))
 
                     if (stderr)
                         return done(stderr)
@@ -156,6 +170,7 @@ describe("# basic functionality", function()
                 })
 
                 break
+            }
         }
     })
 
@@ -170,11 +185,11 @@ describe("# basic functionality", function()
                 url.parse(process.env.DOCKER_HOST).hostname,
                 config.service_bus.port).then(function()
             {
-                done()
-            }, function(error)
+                    done()
+                }, function(error)
             {
-                done(new Error("failed starting nats: " + error.toString()))
-            })
+                    done(new Error("failed starting nats: " + error.toString()))
+                })
         }, function(error)
         {
             done(error)
@@ -191,11 +206,11 @@ describe("# basic functionality", function()
                 url.parse(process.env.DOCKER_HOST).hostname,
                 config.database.port).then(function()
             {
-                done()
-            }, function(error)
+                    done()
+                }, function(error)
             {
-                done(new Error("failed starting rethinkdb: " + error.toString()))
-            })
+                    done(new Error("failed starting rethinkdb: " + error.toString()))
+                })
         }, function(error)
         {
             done(error)
@@ -205,7 +220,7 @@ describe("# basic functionality", function()
     // main/developed service
     before("start microservice", function(done)
     {
-        let cmd = `ps x | fgrep 'node ${pkg.main}' | fgrep -v 'fgrep' | wc -l | awk '{$1=$1};1'`
+        const cmd = `ps x | fgrep 'node ${pkg.main}' | fgrep -v 'fgrep' | wc -l | awk '{$1=$1};1'`
 
         exec(cmd, function(error, out)
         {
@@ -215,7 +230,7 @@ describe("# basic functionality", function()
             if (out != 0)
                 return done()
 
-            let options = []
+            const options = []
 
             if (os.platform() === "darwin")
             {
@@ -224,9 +239,9 @@ describe("# basic functionality", function()
             }
 
             app = fork(pkg.main, options,
-            {
-                silent: true
-            })
+                {
+                    silent: true
+                })
 
             app.stdout.on("data", function(data)
             {
@@ -254,7 +269,7 @@ describe("# basic functionality", function()
                 done(error)
             })
 
-            app.on("close", closeHandler)
+            app.on("close", global.closeHandler)
         })
     })
 
@@ -281,9 +296,16 @@ describe("# basic functionality", function()
     */
 })
 
+/**
+ * Runs a Docker container.
+ * @param {String} image_name - Name of the Docker image
+ * @param {String} tag - Docker image tag
+ * @param {String} container_name - Name of the created Docker container
+ * @return {Promise}
+ */
 function runContainer(image_name, tag, container_name)
 {
-    let image_tag = image_name + ":" + tag
+    const image_tag = image_name + ":" + tag
 
     return new Promise(function(resolve, reject)
     {
@@ -292,7 +314,7 @@ function runContainer(image_name, tag, container_name)
             if (error)
                 return reject(error)
 
-            for (let container of containers)
+            for (const container of containers)
             {
                 // if the same image is already instantiated, don't run it
                 if (container.Image === image_name || container.Image === image_tag)
@@ -304,7 +326,7 @@ function runContainer(image_name, tag, container_name)
                 if (error)
                     return reject(error)
 
-                for (let i = 0, len = list.length; i < len; i++)
+                for (let i = 0, len = list.length ;i < len ;i++)
                 {
                     if (list[i].RepoTags.indexOf(image_tag) !== -1)
                     {
@@ -335,6 +357,10 @@ function runContainer(image_name, tag, container_name)
                 })
             })
 
+            /**
+             * Fetches a Docker image.
+             * @return {Promise}
+             */
             function fetchImage()
             {
                 return new Promise(function(resolve, reject)
@@ -359,41 +385,45 @@ function runContainer(image_name, tag, container_name)
                 })
             }
 
+            /**
+             * Starts a Docker image.
+             * @return {Promise}
+             */
             function startImage()
             {
                 return new Promise(function(resolve, reject)
                 {
-                    let image = docker.getImage(image_name)
+                    const image = docker.getImage(image_name)
 
                     image.inspect(function(error, data)
                     {
                         if (error)
                             return reject(error)
 
-                        let bindings = {
+                        const bindings = {
                             PortBindings:
                             {}
                         }
 
-                        for (let port of Object.keys(data.ContainerConfig.ExposedPorts))
+                        for (const port of Object.keys(data.ContainerConfig.ExposedPorts))
                         {
                             bindings.PortBindings[port] = [
-                            {
-                                "HostPort": port.split("/")[0]
-                            }]
+                                {
+                                    "HostPort": port.split("/")[0]
+                                }]
                         }
 
                         docker.createContainer(
-                        {
-                            Image: image_name,
-                            name: container_name,
-                            HostConfig: bindings
-                        }, function(error, container)
+                            {
+                                Image: image_name,
+                                name: container_name,
+                                HostConfig: bindings
+                            }, function(error, container)
                         {
                             if (error)
                                 return reject(error)
 
-                            container.start(function(error, data)
+                            container.start(function(error)
                             {
                                 if (error)
                                     return reject(error)
@@ -408,32 +438,38 @@ function runContainer(image_name, tag, container_name)
     })
 }
 
+/**
+ * Checks if service port is opened.
+ * @param {String} host - Service hostname
+ * @param {Number} port - Service port
+ * @return {Promise}
+ */
 function checkService(host, port)
 {
     return new Promise(function(resolve, reject)
     {
         let check = 0
 
-        let connect = function()
+        const connect = function()
         {
-            let sock = new net.Socket()
+            const sock = new net.Socket()
 
             sock.connect(
-            {
-                host: host,
-                port: port
-            }, function()
+                {
+                    host: host,
+                    port: port
+                }, function()
             {
                 resolve()
             })
 
-            sock.once('error', function(error)
+            sock.once("error", function(error)
             {
                 if (error.code === "ECONNREFUSED" && check >= 5)
                     reject(error)
             })
 
-            sock.once('close', function()
+            sock.once("close", function()
             {
                 if (check < 5)
                 {
@@ -449,6 +485,11 @@ function checkService(host, port)
         connect()
     })
 }
+
+/**
+ * A global application exit method.
+ * @return {Undefined}
+ */
 
 global.closeHandler = function()
 {

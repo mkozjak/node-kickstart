@@ -6,6 +6,10 @@ require("babel-runtime/core-js/promise").default = Promise
 
 main()
 
+/**
+ * Main application function
+ * @return {Undefined}
+ */
 async function main()
 {
     const config = require("./config")
@@ -48,7 +52,7 @@ async function main()
     // setup database connection
     try
     {
-        let db = new Database(_env, config.database)
+        const db = new Database(_env, config.database)
         _env.db = await db.initialize()
     }
     catch (error)
