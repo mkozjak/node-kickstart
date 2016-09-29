@@ -2,11 +2,15 @@
 
 import assertArgs from "assert-args"
 import bristol from "bristol"
-import stringify from "json-stringify-safe"
 
+/**
+ * Checks internal environment object variables.
+ * @param {Object} value - object with internal variables
+ * @return {Undefined}
+ */
 function checkEnvVars(value)
 {
-    if (typeof(value) !== "object")
+    if (typeof (value) !== "object")
         throw new Error("env should be an object")
 
     if (!value.log && this !== "logger")
@@ -19,14 +23,19 @@ function checkEnvVars(value)
         throw new Error("env.db is required")
 }
 
+/**
+ * Sets configuration.
+ * @param {Object} config - configuration object
+ * @return {Object}
+ */
 function setConfig(config)
 {
     assertArgs(arguments,
-    {
-        "config": "object"
-    })
+        {
+            "config": "object"
+        })
 
-    let argv = require('yargs').usage("Usage: npm start -- [options]")
+    const argv = require("yargs").usage("Usage: npm start -- [options]")
         .option("service-bus-hostname",
         {
             describe: "service bus hostname",
@@ -90,12 +99,17 @@ function setConfig(config)
     return argv
 }
 
+/**
+ * Sets up a logging facility.
+ * @param {Object} config - logging configuration
+ * @return {Bristol}
+ */
 function setLogging(config)
 {
     assertArgs(arguments,
-    {
-        "config": "object"
-    })
+        {
+            "config": "object"
+        })
 
     bristol.addTarget("file",
         {
@@ -109,15 +123,17 @@ function setLogging(config)
     return bristol
 }
 
+/**
+ * Adds a service bus channel to a logging output.
+ * @param {Object} options - channel options
+ * @param {String} severity - log severity
+ * @param {String} date - log date
+ * @param {String} message - log message to be sent to the channel
+ * @return {Undefined}
+ */
 function ServiceBusLogger(options, severity, date, message)
 {
     options.channel.publish(options.subject, message)
 }
 
-export
-{
-    checkEnvVars,
-    setConfig,
-    setLogging,
-    ServiceBusLogger
-}
+export { checkEnvVars, setConfig, setLogging, ServiceBusLogger }

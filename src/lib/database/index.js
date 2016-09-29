@@ -3,17 +3,16 @@
 import assertArgs from "assert-args"
 import { readdirSync as readdir } from "fs"
 import thinky from "thinky"
-import utils from "../utils"
 
 export default class Database
 {
     constructor(env, config)
     {
-        let args = assertArgs(arguments,
-        {
-            "env": "object",
-            "[config]": "object"
-        })
+        const args = assertArgs([ env, config ],
+            {
+                "env": "object",
+                "[config]": "object"
+            })
 
         this.env = args.env
         this.config = args.config
@@ -26,19 +25,19 @@ export default class Database
     {
         switch (this.config.type)
         {
-            case "rethinkdb":
-                try
+        case "rethinkdb":
+            try
                 {
                     this.r = thinky(
-                    {
-                        host: this.config.hostname,
-                        port: this.config.port,
-                        db: this.config.name,
-                        user: this.config.username,
-                        password: this.config.password,
-                        createDatabase: false,
-                        silent: true
-                    })
+                        {
+                            host: this.config.hostname,
+                            port: this.config.port,
+                            db: this.config.name,
+                            user: this.config.username,
+                            password: this.config.password,
+                            createDatabase: false,
+                            silent: true
+                        })
 
                     this.models = this._loadModels()
                     this._setRelations()
@@ -55,12 +54,12 @@ export default class Database
 
     _loadModels()
     {
-        for (let file of readdir(__dirname + "/models"))
+        for (const file of readdir(__dirname + "/models"))
         {
             if (file.indexOf(".") === 0 || file.indexOf(".swp") !== -1)
                 continue
 
-            let model = require(__dirname + "/models/" + file)(this.r, this.config.recreate)
+            const model = require(__dirname + "/models/" + file)(this.r, this.config.recreate)
 
             if (!model)
                 continue
