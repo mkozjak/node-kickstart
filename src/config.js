@@ -46,10 +46,4 @@ const logging = {
     }
 }
 
-export
-{
-    general,
-    service_bus,
-    database,
-    logging
-}
+export { general, service_bus, database, logging }
