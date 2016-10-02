@@ -27,7 +27,7 @@
     "nats": "^0.6.4",
     "node-uuid": "^1.4.7",
     "thinky": "^2.3.6",
-    "yargs": "^5.0.0"
+    "yargs": "^6.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.6.5",
