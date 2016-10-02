@@ -2,10 +2,10 @@
 
 import Promise from "bluebird"
 
-import config from "./config"
+import * as config from "./config"
 import Database from "./lib/database"
 import ServiceBus from "./lib/service_bus"
-import utils from "./lib/utils"
+import * as utils from "./lib/utils"
 
 require("babel-runtime/core-js/promise").default = Promise
 
