@@ -264,6 +264,11 @@ describe("# basic functionality", function()
                 console.log("  @ npm test debugging output:", message)
             })
 
+            app.stderr.on("data", function(data)
+            {
+                console.log("  @ stderr from an app:\n\n", data.toString())
+            })
+
             app.on("error", function(error)
             {
                 done(error)
