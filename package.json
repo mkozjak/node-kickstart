@@ -9,7 +9,8 @@
   "scripts": {
     "build": "mkdir -p ./dist && eslint --fix -c ./.eslintrc.json './src/**/*.js' './test/**/*.js' && babel ./src -d ./dist",
     "pretest": "npm run-script build",
-    "test": "./node_modules/mocha/bin/mocha test/index.spec.js",
+    "test": "mocha test/index.spec.js",
+    "test-integration": "NODE_ENV=integration mocha test/index.spec.js",
     "start": "node dist/app.js"
   },
   "repository": {
