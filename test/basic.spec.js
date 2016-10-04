@@ -322,7 +322,7 @@ function runContainer(image_name, tag, container_name)
             for (const container of containers)
             {
                 // if the same image is already instantiated, don't run it
-                if (container.Image === image_name || container.Image === image_tag)
+                if (container.Names[0].indexOf(image_name) !== -1 || container.Image === image_tag)
                     return resolve()
             }
 
